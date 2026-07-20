@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     'hero-cta-btn',
     'estimate-cta-btn',
     'final-cta-btn',
-    'contact-chat-btn'
+    'contact-chat-btn',
+    'meet-michael-cta-btn'
   ]
 
   ctaIds.forEach((id) => {

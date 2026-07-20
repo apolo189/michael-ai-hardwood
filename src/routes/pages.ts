@@ -14,10 +14,10 @@ pages.get('/', (c) => {
             <i class="fas fa-map-marker-alt"></i> Serving New Rochelle, Larchmont, Rye, Scarsdale &amp; Pelham
           </p>
           <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-walnut-900 leading-tight">
-            Bring Your Hardwood Floors Back To Life
+            Your Floors Aren't Old.<br>They're Forgotten.
           </h1>
           <p class="mt-6 text-lg text-walnut-700 max-w-xl">
-            Get your hardwood floor project estimate in under 5 minutes. Answer a few simple questions and receive a transparent estimate based on your project details — no guesswork, no waiting for a callback.
+            Every scratch, every dull patch — it's not permanent. Get your exact hardwood restoration estimate in under 5 minutes, before anyone ever sets foot in your home.
           </p>
           <div class="mt-8 flex flex-col sm:flex-row gap-4">
             <button id="hero-cta-btn" class="bg-walnut-500 hover:bg-walnut-600 text-white font-semibold px-6 py-4 rounded-lg text-center transition shadow-lg shadow-walnut-500/20">
@@ -45,7 +45,7 @@ pages.get('/', (c) => {
           </div>
           <p class="text-[11px] text-walnut-400 text-center mt-2">*Representative example — actual results vary by project.</p>
           <div class="absolute -top-5 -right-5 bg-white rounded-xl shadow-xl p-3 flex items-center gap-3 border border-walnut-100 hidden sm:flex">
-            <div class="bg-forest-50 text-forest-600 rounded-full w-11 h-11 flex items-center justify-center">
+            <div class="bg-gold-500/15 text-gold-500 rounded-full w-11 h-11 flex items-center justify-center">
               <i class="fas fa-award"></i>
             </div>
             <div>
@@ -55,6 +55,32 @@ pages.get('/', (c) => {
           </div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- PAIN POINTS -->
+  <section class="py-16 bg-walnut-900">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white">Is Your Hardwood Floor Making Your Home Feel Older Than It Is?</h2>
+      <p class="mt-3 text-walnut-300 max-w-2xl mx-auto">You keep the house clean. You take care of it. But the floor tells a different story.</p>
+      <div class="mt-10 grid sm:grid-cols-3 gap-5 text-left">
+        <div class="bg-walnut-800/60 border border-walnut-700 rounded-xl p-5">
+          <div class="w-10 h-10 rounded-lg bg-walnut-700 flex items-center justify-center text-walnut-200 mb-3"><i class="fas fa-paw"></i></div>
+          <p class="font-semibold text-white text-sm">Pet damage &amp; daily wear</p>
+          <p class="text-walnut-300 text-xs mt-1">Claw marks and everyday traffic that just won't buff out.</p>
+        </div>
+        <div class="bg-walnut-800/60 border border-walnut-700 rounded-xl p-5">
+          <div class="w-10 h-10 rounded-lg bg-walnut-700 flex items-center justify-center text-walnut-200 mb-3"><i class="fas fa-bolt"></i></div>
+          <p class="font-semibold text-white text-sm">Scratches everywhere</p>
+          <p class="text-walnut-300 text-xs mt-1">Every scuff is a reminder the floor stopped looking its best.</p>
+        </div>
+        <div class="bg-walnut-800/60 border border-walnut-700 rounded-xl p-5">
+          <div class="w-10 h-10 rounded-lg bg-walnut-700 flex items-center justify-center text-walnut-200 mb-3"><i class="fas fa-cloud"></i></div>
+          <p class="font-semibold text-white text-sm">Dull floors that lost their beauty</p>
+          <p class="text-walnut-300 text-xs mt-1">A once-warm room that now feels flat and tired.</p>
+        </div>
+      </div>
+      <p class="mt-10 font-serif text-2xl sm:text-3xl font-bold text-forest-400">We bring them back to life.</p>
     </div>
   </section>
 
@@ -86,6 +112,25 @@ pages.get('/', (c) => {
     </div>
   </section>
 
+  <!-- MEET MICHAEL AI -->
+  <section class="py-16 bg-gradient-to-br from-forest-700 to-walnut-900">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-[auto_1fr] gap-8 items-center">
+        <img src="/static/images/michael-ai-avatar.jpg" alt="Michael AI illustrated avatar icon" class="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl shadow-xl mx-auto md:mx-0 border-4 border-white/10">
+        <div class="text-center md:text-left">
+          <p class="inline-flex items-center gap-2 text-gold-400 text-xs font-bold uppercase tracking-widest mb-2">
+            <i class="fas fa-robot"></i> Meet Michael AI
+          </p>
+          <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white">Your Flooring Advisor — Trained on 30+ Years of Real Hardwood Expertise</h2>
+          <p class="mt-3 text-walnut-200 max-w-xl mx-auto md:mx-0">Get your estimated investment before anyone visits your home. No waiting on a callback, no vague "we'll quote you on-site" — just straight answers, day or night.</p>
+          <button id="meet-michael-cta-btn" class="mt-6 bg-gold-500 hover:bg-gold-400 text-walnut-900 font-semibold px-6 py-3 rounded-lg transition inline-flex items-center gap-2">
+            <i class="fas fa-comment-dots"></i> Talk to Michael AI Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- TRUST SECTION -->
   <section id="trust" class="py-16 bg-walnut-50 border-t border-walnut-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -108,7 +153,7 @@ pages.get('/', (c) => {
         <div>
           <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-walnut-500 text-xl shadow-sm"><i class="fas fa-tools"></i></div>
           <p class="font-semibold text-walnut-900">Quality Craftsmanship</p>
-          <p class="text-sm text-walnut-500">Licensed &amp; insured team</p>
+          <p class="text-sm text-walnut-500">Careful, detail-oriented work</p>
         </div>
       </div>
     </div>

@@ -21,7 +21,8 @@ export function pageShell(opts: { title: string; description: string; bodyConten
         extend: {
           colors: {
             walnut: { 50:'#faf6f2',100:'#f0e6da',200:'#dfc9ab',300:'#c9a877',400:'#b3874f',500:'#8a5f30',600:'#6e4a26',700:'#54371d',800:'#3d2814',900:'#28190c' },
-            forest: { 50:'#f2f6f3',100:'#dfe9e1',500:'#3f6b4d',600:'#345a40',700:'#294732'}
+            forest: { 50:'#f2f6f3',100:'#dfe9e1',400:'#5c8d6c',500:'#3f6b4d',600:'#345a40',700:'#294732'},
+            gold: { 400:'#d4af6a',500:'#c49a4a'}
           },
           fontFamily: {
             serif: ['"Playfair Display"','serif'],
@@ -67,7 +68,7 @@ export function pageShell(opts: { title: string; description: string; bodyConten
           <i class="fas fa-tree text-walnut-300"></i>
           <span class="font-serif text-lg font-bold text-white">Westchester Hardwood Experts</span>
         </div>
-        <p class="text-sm text-walnut-300">Premium hardwood flooring sanding, refinishing, and installation for Westchester County homeowners. Licensed & insured. 30+ years of craftsmanship.</p>
+        <p class="text-sm text-walnut-300">Premium hardwood flooring sanding, refinishing, and installation for Westchester County homeowners. 30+ years of craftsmanship.</p>
       </div>
       <div>
         <h4 class="text-white font-semibold mb-3">Company</h4>

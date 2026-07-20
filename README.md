@@ -1,10 +1,20 @@
-# Michael AI — Hardwood Flooring Sales Specialist (MVP v2)
+# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.1 — Emotional Design Pass)
 
 ## Project Overview
 - **Name**: Westchester Hardwood Experts — powered by Michael AI
 - **Goal**: Generate qualified hardwood flooring leads from Google Ads via a button-driven guided estimate wizard ("Michael AI") that educates homeowners, calculates a transparent, exact estimate, and hands off "hot" qualified leads to a human closer.
 - **Target Areas**: New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale, Pelham (Westchester County, NY)
 - **Business strategy**: **70% automation / 30% human** — Michael AI captures, educates, calculates, and qualifies. The human specialist (Luis) closes by phone or in-person visit. *"Michael AI abre la puerta. Luis cierra el trabajo."*
+
+## What's New in v2.1 (Emotional Design Pass)
+Landing page design review feedback: the site was "clean and professional but missing the emotional wow factor." Response, without touching the existing premium structure:
+- **New emotional headline**: *"Your Floors Aren't Old. They're Forgotten."* (replaces the more literal "Bring Your Hardwood Floors Back To Life").
+- **New "Pain Points" section** (dark walnut background, right after the hero) — names the homeowner's real feelings (pet damage, scratches, dull floors that lost their beauty) before presenting the solution ("We bring them back to life."). Creates emotional contrast before the "Old Way vs Our Way" section.
+- **New "Meet Michael AI" section** — a dedicated, high-contrast (forest-to-walnut gradient) section that sells the "wow" of instant pricing before a visit. Uses an **AI-generated illustrated/vector avatar icon** for Michael AI — deliberately abstract/graphic, NOT a photorealistic human face, to avoid misrepresenting a real person (Google Ads / FTC risk — "Michael" is the AI assistant's name, not a real staff member).
+- **More color contrast**: added a `gold` accent color (`gold-400`/`gold-500`) to the Tailwind config, used sparingly (Michael AI CTA button, hero "30+ Years" badge) plus the new dark walnut/forest gradient sections for visual rhythm — the page no longer feels uniformly beige/brown.
+- **Regenerated before/after hero images** with more dramatic emotional contrast: the "before" floor now looks genuinely tired/worn/neglected (dim lighting, dull gray-brown tone, visible scratches) vs. the previous version which looked too "polished portfolio". The "after" image was regenerated to match the same room/composition for a believable pair. Disclaimer text unchanged ("Representative example — actual results vary by project.").
+- **Removed all "Licensed & insured" claims** (Trust section card + footer tagline) — this was an unconfirmed credential. Replaced with neutral, honest copy ("Careful, detail-oriented work"). **Action item**: if Luis confirms the business is actually licensed & insured, this badge can be safely reinstated with that real credential.
+- **Explicitly decided NOT to add a real human photo/bio for "Michael"** — Michael AI is the assistant's name, not a real person, and using a photo/bio would misrepresent business identity (Google Ads compliance + legal risk). The "Meet Michael AI" section leans into this being an AI advisor as the actual differentiator, instead of faking a human specialist.
 
 ## What's New in v2 (Strategic Pivot)
 - **80% buttons / 20% free text** — the estimate flow is now a deterministic, guided wizard (vanilla JS state machine), not an open LLM conversation. The LLM is only used as a **fallback** for off-script free-text questions (e.g. repair inquiries, general questions) via `/api/chat/message`. It never touches pricing.
@@ -70,7 +80,7 @@ The AI **never** invents a price. All totals are calculated by `calculateEstimat
 - **D1 Database** (`michael-ai-hardwood-production`) — table `leads` (name, phone, email, address, city, service, square_footage, finish_option, **finish_coats**, **estimate_total**, labor_only, appointment_day_pref, appointment_window, photos_json, conversation_summary, consent_contact, **wants_call_now**, status, created_at) and `chat_sessions` (unused in v2 flow)
 - **R2 Bucket** (`michael-ai-hardwood-photos`) — customer-uploaded floor photos, key format `leads/<timestamp>-<rand>.<ext>`
 - **Web3Forms** — outbound email notification service (no SMTP available on Cloudflare Workers)
-- **Static images** — `public/static/images/floor-before.jpg` / `floor-after.jpg` (AI-generated, optimized to ~150-190KB JPEGs)
+- **Static images** — `public/static/images/floor-before.jpg` / `floor-after.jpg` (AI-generated, v2.1 regenerated for more emotional contrast, optimized to ~185-190KB JPEGs), `michael-ai-avatar.jpg` (AI-generated illustrated/vector icon, ~21KB, deliberately non-photorealistic)
 
 ## ⚠️ Pending / Not Yet Configured
 1. **`WEB3FORMS_ACCESS_KEY`** — needs the Access Key from a **new, dedicated** Web3Forms form (separate from any other project's form) tied to the business Gmail. Currently empty in `.dev.vars`; lead notification currently returns `notified: false, notifyError: "WEB3FORMS_ACCESS_KEY not configured"` (confirmed via local testing) until this is set. **Leads still save correctly to D1 regardless.**
