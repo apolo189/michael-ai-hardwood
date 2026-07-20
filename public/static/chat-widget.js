@@ -47,8 +47,9 @@
   function renderRoot() {
     const root = document.getElementById('chat-widget-root')
     root.innerHTML = `
-      <button id="chat-fab" class="fixed bottom-6 right-6 z-50 bg-walnut-500 hover:bg-walnut-600 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl transition">
+      <button id="chat-fab" class="cta-pulse fixed bottom-6 right-6 z-50 bg-gold-500 hover:bg-gold-400 text-walnut-900 font-bold rounded-full flex items-center justify-center gap-2 transition shadow-xl w-16 h-16 sm:w-auto sm:h-auto sm:px-5 sm:py-4 text-2xl sm:text-base">
         <i class="fas fa-comment-dots"></i>
+        <span class="hidden sm:inline">Get My Estimate Now</span>
       </button>
 
       <div id="michael-chat-panel" class="hidden-state fixed bottom-6 right-6 z-50 w-[92vw] max-w-sm h-[75vh] max-h-[640px] bg-white rounded-2xl shadow-2xl border border-walnut-100 flex flex-col overflow-hidden">

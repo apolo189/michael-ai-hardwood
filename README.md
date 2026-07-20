@@ -1,10 +1,18 @@
-# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.1 — Emotional Design Pass)
+# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.2 — Conversion Polish)
 
 ## Project Overview
 - **Name**: Westchester Hardwood Experts — powered by Michael AI
 - **Goal**: Generate qualified hardwood flooring leads from Google Ads via a button-driven guided estimate wizard ("Michael AI") that educates homeowners, calculates a transparent, exact estimate, and hands off "hot" qualified leads to a human closer.
 - **Target Areas**: New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale, Pelham (Westchester County, NY)
 - **Business strategy**: **70% automation / 30% human** — Michael AI captures, educates, calculates, and qualifies. The human specialist (Luis) closes by phone or in-person visit. *"Michael AI abre la puerta. Luis cierra el trabajo."*
+
+## What's New in v2.2 (Conversion Polish — "Shark Sees Blood" CTA)
+Follow-up design feedback: the CTA needed to be impossible to ignore, and the site needed to reduce friction by showing "how easy" the process is.
+- **CTA copy strengthened**: "Get My Estimate" → **"Get My Estimate Now"** on all 3 primary buttons (hero, calculator teaser, final CTA) and the floating chat button.
+- **New "As Easy as 1-2-3" section** right after the hero — 3 numbered steps (Answer a few quick questions → Get your exact price instantly → Schedule your visit or request a call) to reduce friction before the visitor even opens the chat.
+- **"Powered by Michael AI" badge added directly in the Hero** — a short line under the CTA button (`Powered by Michael AI — get your exact price in minutes, before anyone visits your home`) so Michael AI's core value proposition is visible on first scroll, not just in its own section further down.
+- **Primary CTA now uses the `gold` accent color** (previously walnut-brown, blending into the rest of the page) with a **pulsing glow animation** (`.cta-pulse` in `style.css`) — a soft scale + expanding ring effect that draws the eye without being obnoxious. Applied only to the hero CTA, final CTA, and the floating chat button (the calculator CTA stays forest-green so only the highest-priority actions "pulse" — if everything glowed, nothing would stand out).
+- **Floating chat button (FAB) redesigned**: now shows text ("Get My Estimate Now") next to the icon on desktop (icon-only circle on mobile to save space), gold color, same pulse animation — always visible while scrolling.
 
 ## What's New in v2.1 (Emotional Design Pass)
 Landing page design review feedback: the site was "clean and professional but missing the emotional wow factor." Response, without touching the existing premium structure:

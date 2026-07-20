@@ -37,7 +37,40 @@ html { scroll-behavior: smooth; }
 }
 
 #chat-fab {
-  box-shadow: 0 8px 24px rgba(138, 95, 48, 0.35);
+  box-shadow: 0 8px 24px rgba(196, 154, 74, 0.5);
+}
+
+/* "Shark sees blood" pulse effect for the primary conversion CTAs */
+.cta-pulse {
+  position: relative;
+  animation: ctaPulseScale 2.2s ease-in-out infinite;
+}
+.cta-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(196, 154, 74, 0.55);
+  animation: ctaPulseRing 2.2s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes ctaPulseScale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+@keyframes ctaPulseRing {
+  0% { box-shadow: 0 0 0 0 rgba(196, 154, 74, 0.55); }
+  70% { box-shadow: 0 0 0 14px rgba(196, 154, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(196, 154, 74, 0); }
+}
+
+/* Floating CTA (chat-fab) entrance animation, plays once after scroll */
+.fab-enter {
+  animation: fabEnter 0.5s ease-out;
+}
+@keyframes fabEnter {
+  0% { opacity: 0; transform: translateY(16px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .quick-reply-btn:hover {

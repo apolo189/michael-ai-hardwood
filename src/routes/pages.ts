@@ -20,14 +20,15 @@ pages.get('/', (c) => {
             Every scratch, every dull patch — it's not permanent. Get your exact hardwood restoration estimate in under 5 minutes, before anyone ever sets foot in your home.
           </p>
           <div class="mt-8 flex flex-col sm:flex-row gap-4">
-            <button id="hero-cta-btn" class="bg-walnut-500 hover:bg-walnut-600 text-white font-semibold px-6 py-4 rounded-lg text-center transition shadow-lg shadow-walnut-500/20">
-              <i class="fas fa-comment-dots mr-2"></i> Get My Estimate
+            <button id="hero-cta-btn" class="cta-pulse bg-gold-500 hover:bg-gold-400 text-walnut-900 font-bold px-6 py-4 rounded-lg text-center transition shadow-lg shadow-gold-500/30">
+              <i class="fas fa-comment-dots mr-2"></i> Get My Estimate Now
             </button>
             <a href="tel:+19143162170" class="border border-walnut-300 hover:border-walnut-500 text-walnut-800 font-semibold px-6 py-4 rounded-lg text-center transition">
               <i class="fas fa-phone mr-2"></i> Call Now
             </a>
           </div>
-          <p class="mt-4 text-sm text-walnut-500"><i class="fas fa-lock mr-1"></i> Your information is used only to prepare your estimate. See our <a href="/privacy-policy" class="underline">Privacy Policy</a>.</p>
+          <p class="mt-3 text-sm text-forest-600 font-medium"><i class="fas fa-robot mr-1"></i> Powered by Michael AI — get your exact price in minutes, before anyone visits your home.</p>
+          <p class="mt-2 text-sm text-walnut-500"><i class="fas fa-lock mr-1"></i> Your information is used only to prepare your estimate. See our <a href="/privacy-policy" class="underline">Privacy Policy</a>.</p>
         </div>
         <div class="relative">
           <div class="bg-white rounded-2xl shadow-2xl border border-walnut-100 p-3">
@@ -53,6 +54,30 @@ pages.get('/', (c) => {
               <p class="text-xs text-walnut-500">Hardwood Experience</p>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AS EASY AS 1-2-3 -->
+  <section class="py-12 bg-white border-t border-walnut-100">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="text-center font-serif text-2xl sm:text-3xl font-bold text-walnut-900 mb-8">As Easy as 1-2-3</p>
+      <div class="grid sm:grid-cols-3 gap-6">
+        <div class="text-center">
+          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-gold-500/15 text-gold-500 font-serif font-bold text-xl flex items-center justify-center">01</div>
+          <p class="font-semibold text-walnut-900">Answer a Few Quick Questions</p>
+          <p class="text-sm text-walnut-500 mt-1">Michael AI guides you, step by step — no forms to fill out.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-gold-500/15 text-gold-500 font-serif font-bold text-xl flex items-center justify-center">02</div>
+          <p class="font-semibold text-walnut-900">Get Your Exact Price — Instantly</p>
+          <p class="text-sm text-walnut-500 mt-1">No ranges, no waiting for a callback. A real number, right away.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-gold-500/15 text-gold-500 font-serif font-bold text-xl flex items-center justify-center">03</div>
+          <p class="font-semibold text-walnut-900">Schedule Your Visit or Request a Call</p>
+          <p class="text-sm text-walnut-500 mt-1">You decide — book a visit or talk to a specialist right now.</p>
         </div>
       </div>
     </div>
@@ -183,7 +208,7 @@ pages.get('/', (c) => {
       <p class="mt-3 text-walnut-600">Michael AI walks you through a few simple questions and gives you an exact estimate — no ranges, no guessing.</p>
       <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
         <button id="estimate-cta-btn" class="bg-forest-600 hover:bg-forest-700 text-white font-semibold px-8 py-4 rounded-lg transition shadow-lg shadow-forest-600/20">
-          <i class="fas fa-calculator mr-2"></i> Get My Estimate
+          <i class="fas fa-calculator mr-2"></i> Get My Estimate Now
         </button>
         <a href="tel:+19143162170" class="border border-walnut-300 hover:border-walnut-500 text-walnut-800 font-semibold px-8 py-4 rounded-lg transition">
           <i class="fas fa-phone mr-2"></i> Call Now
@@ -230,8 +255,8 @@ pages.get('/', (c) => {
       <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">Ready to See What's Possible for Your Floors?</h2>
       <p class="mt-3 text-walnut-300">Get your exact estimate in under 5 minutes — no obligation, no pressure, just honest answers.</p>
       <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-        <button id="final-cta-btn" class="bg-white text-walnut-900 hover:bg-walnut-100 font-semibold px-8 py-4 rounded-lg transition">
-          <i class="fas fa-comment-dots mr-2"></i> Get My Estimate
+        <button id="final-cta-btn" class="cta-pulse bg-gold-500 hover:bg-gold-400 text-walnut-900 font-bold px-8 py-4 rounded-lg transition shadow-lg shadow-gold-500/30">
+          <i class="fas fa-comment-dots mr-2"></i> Get My Estimate Now
         </button>
         <a href="tel:+19143162170" class="border border-walnut-600 hover:border-walnut-400 text-white font-semibold px-8 py-4 rounded-lg transition">
           <i class="fas fa-phone mr-2"></i> Call Now
