@@ -46,8 +46,8 @@ export function pageShell(opts: { title: string; description: string; bodyConten
         <a href="/#faq" class="hover:text-walnut-500">FAQ</a>
       </nav>
       <div class="flex items-center gap-4">
-        <a href="tel:+19145550142" class="hidden sm:flex items-center gap-2 text-sm font-semibold text-walnut-800">
-          <i class="fas fa-phone text-walnut-500"></i> (914) 555-0142
+        <a href="tel:+19143162170" class="hidden sm:flex items-center gap-2 text-sm font-semibold text-walnut-800">
+          <i class="fas fa-phone text-walnut-500"></i> (914) 316-2170
         </a>
         <button id="open-chat-btn" class="bg-walnut-500 hover:bg-walnut-600 text-white text-sm font-semibold px-4 py-2 rounded-full transition">
           <i class="fas fa-comment-dots mr-1"></i> Ask Michael AI
@@ -89,7 +89,7 @@ export function pageShell(opts: { title: string; description: string; bodyConten
       <div>
         <h4 class="text-white font-semibold mb-3">Contact</h4>
         <ul class="text-sm space-y-2 text-walnut-300">
-          <li><i class="fas fa-phone mr-2"></i><a href="tel:+19145550142" class="hover:text-white">(914) 555-0142</a></li>
+          <li><i class="fas fa-phone mr-2"></i><a href="tel:+19143162170" class="hover:text-white">(914) 316-2170</a></li>
           <li><i class="fas fa-envelope mr-2"></i><a href="mailto:info@westchesterhardwoodexperts.com" class="hover:text-white">info@westchesterhardwoodexperts.com</a></li>
           <li><i class="fas fa-map-marker-alt mr-2"></i>Serving New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale &amp; Pelham, NY</li>
         </ul>

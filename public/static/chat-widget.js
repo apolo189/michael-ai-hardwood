@@ -308,7 +308,7 @@
       wizard.estimate = res.data
       renderEstimateResult(res.data)
     } catch (err) {
-      addAssistantMessage("Sorry, I couldn't calculate that estimate. Please call us at (914) 555-0142 and we'll help right away.")
+      addAssistantMessage("Sorry, I couldn't calculate that estimate. Please call us at (914) 316-2170 and we'll help right away.")
     }
   }
 
@@ -445,7 +445,7 @@
         throw new Error(res.data?.error || 'Unknown error')
       }
     } catch (err) {
-      errorEl.textContent = 'Something went wrong. Please try again or call us at (914) 555-0142.'
+      errorEl.textContent = 'Something went wrong. Please try again or call us at (914) 316-2170.'
       errorEl.classList.remove('hidden')
       submitBtn.disabled = false
       submitBtn.textContent = wantsCallNow ? 'Request My Call' : 'Confirm Request'
@@ -474,7 +474,7 @@
       addAssistantMessage(data.reply || "Could you tell me a bit more?")
     } catch (err) {
       removeTypingIndicator()
-      addAssistantMessage("Sorry, something went wrong. Please try again, or call us at (914) 555-0142.")
+      addAssistantMessage("Sorry, something went wrong. Please try again, or call us at (914) 316-2170.")
     }
   }
 

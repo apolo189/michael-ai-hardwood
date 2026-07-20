@@ -23,7 +23,7 @@ pages.get('/', (c) => {
             <button id="hero-cta-btn" class="bg-walnut-500 hover:bg-walnut-600 text-white font-semibold px-6 py-4 rounded-lg text-center transition shadow-lg shadow-walnut-500/20">
               <i class="fas fa-comment-dots mr-2"></i> Get My Estimate
             </button>
-            <a href="tel:+19145550142" class="border border-walnut-300 hover:border-walnut-500 text-walnut-800 font-semibold px-6 py-4 rounded-lg text-center transition">
+            <a href="tel:+19143162170" class="border border-walnut-300 hover:border-walnut-500 text-walnut-800 font-semibold px-6 py-4 rounded-lg text-center transition">
               <i class="fas fa-phone mr-2"></i> Call Now
             </a>
           </div>
@@ -121,13 +121,12 @@ pages.get('/', (c) => {
         <h2 class="font-serif text-3xl sm:text-4xl font-bold text-walnut-900">Our Hardwood Flooring Services</h2>
         <p class="mt-3 text-walnut-600">Chat with Michael AI to get a transparent, exact estimate for any of these services.</p>
       </div>
-      <div class="grid md:grid-cols-3 gap-6" id="services-grid">
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6" id="services-grid">
         ${serviceCard('fa-broom', 'Sanding & Refinishing — Natural Look', 'Restore worn hardwood to its natural beauty with complete sanding and a durable 3-coat finish.', '$3.50/sq ft')}
         ${serviceCard('fa-palette', 'Sanding & Refinishing — Custom Stain', 'Sanding plus a custom stain color of your choice, with 2 or 3 finish coats.', 'From $3.50/sq ft')}
         ${serviceCard('fa-hammer', 'Red Oak Installation 2 1/4"', 'Professional installation of new Red Oak hardwood flooring. Labor only.', '$3.75/sq ft')}
         ${serviceCard('fa-layer-group', 'Prefinished Hardwood Installation', 'Professional installation of prefinished hardwood. Labor only.', '$2.75/sq ft')}
         ${serviceCard('fa-th-large', 'Pergo / Laminate Installation', 'Expert installation of Pergo or laminate flooring. Labor only.', '$3.00/sq ft')}
-        ${serviceCard("fa-wrench", "Repairs & Custom Projects", "Every situation is unique — chat with Michael AI and we'll schedule a specialist visit, no obligation.", "In-person quote")}
       </div>
     </div>
   </section>
@@ -141,7 +140,7 @@ pages.get('/', (c) => {
         <button id="estimate-cta-btn" class="bg-forest-600 hover:bg-forest-700 text-white font-semibold px-8 py-4 rounded-lg transition shadow-lg shadow-forest-600/20">
           <i class="fas fa-calculator mr-2"></i> Get My Estimate
         </button>
-        <a href="tel:+19145550142" class="border border-walnut-300 hover:border-walnut-500 text-walnut-800 font-semibold px-8 py-4 rounded-lg transition">
+        <a href="tel:+19143162170" class="border border-walnut-300 hover:border-walnut-500 text-walnut-800 font-semibold px-8 py-4 rounded-lg transition">
           <i class="fas fa-phone mr-2"></i> Call Now
         </a>
       </div>
@@ -189,7 +188,7 @@ pages.get('/', (c) => {
         <button id="final-cta-btn" class="bg-white text-walnut-900 hover:bg-walnut-100 font-semibold px-8 py-4 rounded-lg transition">
           <i class="fas fa-comment-dots mr-2"></i> Get My Estimate
         </button>
-        <a href="tel:+19145550142" class="border border-walnut-600 hover:border-walnut-400 text-white font-semibold px-8 py-4 rounded-lg transition">
+        <a href="tel:+19143162170" class="border border-walnut-600 hover:border-walnut-400 text-white font-semibold px-8 py-4 rounded-lg transition">
           <i class="fas fa-phone mr-2"></i> Call Now
         </a>
       </div>
@@ -244,7 +243,7 @@ pages.get('/privacy-policy', (c) => {
         <p>You may request access to, correction of, or deletion of your personal information at any time by contacting us at <a href="mailto:info@westchesterhardwoodexperts.com" class="underline">info@westchesterhardwoodexperts.com</a>.</p>
 
         <h2 class="text-xl font-bold text-walnut-900 mt-8">Contact Us</h2>
-        <p>Westchester Hardwood Experts<br>Phone: (914) 555-0142<br>Email: info@westchesterhardwoodexperts.com</p>
+        <p>Westchester Hardwood Experts<br>Phone: (914) 316-2170<br>Email: info@westchesterhardwoodexperts.com</p>
       </div>
     </div>
   </section>
@@ -284,7 +283,7 @@ pages.get('/terms-of-service', (c) => {
         <p>We may update these Terms from time to time. Continued use of the Site constitutes acceptance of the updated Terms.</p>
 
         <h2 class="text-xl font-bold text-walnut-900 mt-8">Contact</h2>
-        <p>Westchester Hardwood Experts<br>Phone: (914) 555-0142<br>Email: info@westchesterhardwoodexperts.com</p>
+        <p>Westchester Hardwood Experts<br>Phone: (914) 316-2170<br>Email: info@westchesterhardwoodexperts.com</p>
       </div>
     </div>
   </section>
@@ -299,7 +298,7 @@ pages.get('/accessibility', (c) => {
       <h1 class="font-serif text-4xl font-bold text-walnut-900 mb-6">Accessibility Statement</h1>
       <div class="space-y-6 text-walnut-700 leading-relaxed">
         <p>Westchester Hardwood Experts is committed to ensuring digital accessibility for people of all abilities. We are continually improving the user experience for everyone and applying relevant accessibility standards.</p>
-        <p>If you experience any difficulty accessing content on this website or interacting with Michael AI, please contact us at <a href="mailto:info@westchesterhardwoodexperts.com" class="underline">info@westchesterhardwoodexperts.com</a> or call (914) 555-0142, and we will make reasonable efforts to assist you.</p>
+        <p>If you experience any difficulty accessing content on this website or interacting with Michael AI, please contact us at <a href="mailto:info@westchesterhardwoodexperts.com" class="underline">info@westchesterhardwoodexperts.com</a> or call (914) 316-2170, and we will make reasonable efforts to assist you.</p>
       </div>
     </div>
   </section>
@@ -330,7 +329,7 @@ pages.get('/contact', (c) => {
       <h1 class="font-serif text-4xl font-bold text-walnut-900 mb-6">Contact Us</h1>
       <p class="text-walnut-600 mb-8">Have a question before chatting with Michael AI? Reach out directly.</p>
       <div class="space-y-3 text-walnut-800">
-        <p><i class="fas fa-phone mr-2 text-walnut-500"></i><a href="tel:+19145550142" class="font-semibold">(914) 555-0142</a></p>
+        <p><i class="fas fa-phone mr-2 text-walnut-500"></i><a href="tel:+19143162170" class="font-semibold">(914) 316-2170</a></p>
         <p><i class="fas fa-envelope mr-2 text-walnut-500"></i><a href="mailto:info@westchesterhardwoodexperts.com" class="font-semibold">info@westchesterhardwoodexperts.com</a></p>
         <p><i class="fas fa-map-marker-alt mr-2 text-walnut-500"></i>Serving New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale &amp; Pelham, NY</p>
       </div>
