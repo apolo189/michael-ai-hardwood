@@ -7,63 +7,106 @@ pages.get('/', (c) => {
   const body = `
   <!-- HERO -->
   <section class="relative overflow-hidden bg-gradient-to-b from-walnut-50 to-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 grid lg:grid-cols-2 gap-12 items-center">
-      <div>
-        <p class="inline-flex items-center gap-2 text-forest-600 bg-forest-50 text-xs font-semibold px-3 py-1 rounded-full mb-4">
-          <i class="fas fa-map-marker-alt"></i> Serving New Rochelle, Larchmont, Rye, Scarsdale &amp; Pelham
-        </p>
-        <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-walnut-900 leading-tight">
-          Transform Your Hardwood Floors With Expert Craftsmanship
-        </h1>
-        <p class="mt-6 text-lg text-walnut-700 max-w-xl">
-          Get your hardwood flooring options and estimated investment before scheduling your professional evaluation — no guesswork, no pressure.
-        </p>
-        <div class="mt-8 flex flex-col sm:flex-row gap-4">
-          <button id="hero-cta-btn" class="bg-walnut-500 hover:bg-walnut-600 text-white font-semibold px-6 py-4 rounded-lg text-center transition shadow-lg shadow-walnut-500/20">
-            <i class="fas fa-comment-dots mr-2"></i> Get My Hardwood Floor Estimate
-          </button>
-          <a href="tel:+19145550142" class="border border-walnut-300 hover:border-walnut-500 text-walnut-800 font-semibold px-6 py-4 rounded-lg text-center transition">
-            <i class="fas fa-phone mr-2"></i> Call (914) 555-0142
-          </a>
-        </div>
-        <p class="mt-4 text-sm text-walnut-500"><i class="fas fa-lock mr-1"></i> Your information is used only to prepare your estimate. See our <a href="/privacy-policy" class="underline">Privacy Policy</a>.</p>
-      </div>
-      <div class="relative">
-        <img src="${HERO_IMAGE}" alt="Beautifully refinished hardwood floor in a Westchester County home" class="rounded-2xl shadow-2xl w-full object-cover aspect-[4/3]">
-        <div class="absolute -bottom-6 -left-6 bg-white rounded-xl shadow-xl p-4 flex items-center gap-3 border border-walnut-100">
-          <div class="bg-forest-50 text-forest-600 rounded-full w-12 h-12 flex items-center justify-center">
-            <i class="fas fa-star"></i>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <p class="inline-flex items-center gap-2 text-forest-600 bg-forest-50 text-xs font-semibold px-3 py-1 rounded-full mb-4">
+            <i class="fas fa-map-marker-alt"></i> Serving New Rochelle, Larchmont, Rye, Scarsdale &amp; Pelham
+          </p>
+          <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-walnut-900 leading-tight">
+            Bring Your Hardwood Floors Back To Life
+          </h1>
+          <p class="mt-6 text-lg text-walnut-700 max-w-xl">
+            Get your hardwood floor project estimate in under 5 minutes. Answer a few simple questions and receive a transparent estimate based on your project details — no guesswork, no waiting for a callback.
+          </p>
+          <div class="mt-8 flex flex-col sm:flex-row gap-4">
+            <button id="hero-cta-btn" class="bg-walnut-500 hover:bg-walnut-600 text-white font-semibold px-6 py-4 rounded-lg text-center transition shadow-lg shadow-walnut-500/20">
+              <i class="fas fa-comment-dots mr-2"></i> Get My Estimate
+            </button>
+            <a href="tel:+19145550142" class="border border-walnut-300 hover:border-walnut-500 text-walnut-800 font-semibold px-6 py-4 rounded-lg text-center transition">
+              <i class="fas fa-phone mr-2"></i> Call Now
+            </a>
           </div>
-          <div>
-            <p class="font-bold text-walnut-900 leading-none">30+ Years</p>
-            <p class="text-xs text-walnut-500">Hardwood Flooring Experience</p>
+          <p class="mt-4 text-sm text-walnut-500"><i class="fas fa-lock mr-1"></i> Your information is used only to prepare your estimate. See our <a href="/privacy-policy" class="underline">Privacy Policy</a>.</p>
+        </div>
+        <div class="relative">
+          <div class="bg-white rounded-2xl shadow-2xl border border-walnut-100 p-3">
+            <div class="grid grid-cols-2 gap-2">
+              <div class="relative">
+                <img src="/static/images/floor-before.jpg" alt="Illustrative example of an old, worn hardwood floor before restoration" class="rounded-xl w-full object-cover aspect-[4/3]">
+                <span class="absolute top-2 left-2 bg-walnut-900/80 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full">Before</span>
+              </div>
+              <div class="relative">
+                <img src="/static/images/floor-after.jpg" alt="Illustrative example of a beautifully restored hardwood floor after refinishing" class="rounded-xl w-full object-cover aspect-[4/3]">
+                <span class="absolute top-2 left-2 bg-forest-600/90 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full">After</span>
+              </div>
+            </div>
+            <p class="text-center text-walnut-800 font-serif font-semibold mt-3 text-sm">Your hardwood floors may not need replacement.<br>They may just need the right restoration.</p>
+          </div>
+          <p class="text-[11px] text-walnut-400 text-center mt-2">*Representative example — actual results vary by project.</p>
+          <div class="absolute -top-5 -right-5 bg-white rounded-xl shadow-xl p-3 flex items-center gap-3 border border-walnut-100 hidden sm:flex">
+            <div class="bg-forest-50 text-forest-600 rounded-full w-11 h-11 flex items-center justify-center">
+              <i class="fas fa-award"></i>
+            </div>
+            <div>
+              <p class="font-bold text-walnut-900 leading-none text-sm">30+ Years</p>
+              <p class="text-xs text-walnut-500">Hardwood Experience</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- OLD WAY VS OUR WAY -->
+  <section class="py-14 bg-white border-t border-walnut-100">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-walnut-900">No Guessing. No Hidden Surprises.</h2>
+        <p class="mt-2 text-walnut-600 text-sm max-w-2xl mx-auto">Your estimate is calculated based on your selected service and square footage. Your specialist visit is only to confirm measurements and floor condition.</p>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="bg-walnut-50 rounded-xl p-5 border border-walnut-100">
+          <p class="text-xs font-bold uppercase tracking-wide text-walnut-400 mb-3">The Old Way</p>
+          <ul class="space-y-2 text-sm text-walnut-600">
+            <li><i class="fas fa-times text-walnut-300 mr-2"></i>Call and wait days for a callback</li>
+            <li><i class="fas fa-times text-walnut-300 mr-2"></i>"We'll quote you on-site" with no idea beforehand</li>
+            <li><i class="fas fa-times text-walnut-300 mr-2"></i>Surprise costs after the visit</li>
+          </ul>
+        </div>
+        <div class="bg-forest-50 rounded-xl p-5 border border-forest-100">
+          <p class="text-xs font-bold uppercase tracking-wide text-forest-600 mb-3">Our Way</p>
+          <ul class="space-y-2 text-sm text-walnut-700">
+            <li><i class="fas fa-check text-forest-500 mr-2"></i>Get your estimate in minutes with Michael AI</li>
+            <li><i class="fas fa-check text-forest-500 mr-2"></i>Transparent pricing before you schedule anything</li>
+            <li><i class="fas fa-check text-forest-500 mr-2"></i>Same price in person, if details match what you told us</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- TRUST SECTION -->
-  <section id="trust" class="py-16 bg-white border-t border-walnut-100">
+  <section id="trust" class="py-16 bg-walnut-50 border-t border-walnut-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
         <div>
-          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-walnut-50 flex items-center justify-center text-walnut-500 text-xl"><i class="fas fa-award"></i></div>
+          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-walnut-500 text-xl shadow-sm"><i class="fas fa-award"></i></div>
           <p class="font-semibold text-walnut-900">30+ Years Experience</p>
           <p class="text-sm text-walnut-500">Hardwood flooring specialists</p>
         </div>
         <div>
-          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-walnut-50 flex items-center justify-center text-walnut-500 text-xl"><i class="fas fa-hand-holding-usd"></i></div>
-          <p class="font-semibold text-walnut-900">Honest Pricing</p>
-          <p class="text-sm text-walnut-500">Transparent, no surprises</p>
+          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-walnut-500 text-xl shadow-sm"><i class="fas fa-hand-holding-usd"></i></div>
+          <p class="font-semibold text-walnut-900">Transparent Pricing</p>
+          <p class="text-sm text-walnut-500">No hidden surprises</p>
         </div>
         <div>
-          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-walnut-50 flex items-center justify-center text-walnut-500 text-xl"><i class="fas fa-clipboard-check"></i></div>
+          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-walnut-500 text-xl shadow-sm"><i class="fas fa-clipboard-check"></i></div>
           <p class="font-semibold text-walnut-900">Professional Evaluation</p>
           <p class="text-sm text-walnut-500">In-home visit &amp; confirmation</p>
         </div>
         <div>
-          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-walnut-50 flex items-center justify-center text-walnut-500 text-xl"><i class="fas fa-tools"></i></div>
+          <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-white flex items-center justify-center text-walnut-500 text-xl shadow-sm"><i class="fas fa-tools"></i></div>
           <p class="font-semibold text-walnut-900">Quality Craftsmanship</p>
           <p class="text-sm text-walnut-500">Licensed &amp; insured team</p>
         </div>
@@ -72,33 +115,37 @@ pages.get('/', (c) => {
   </section>
 
   <!-- SERVICES -->
-  <section id="services" class="py-16 bg-walnut-50">
+  <section id="services" class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-2xl mx-auto mb-12">
         <h2 class="font-serif text-3xl sm:text-4xl font-bold text-walnut-900">Our Hardwood Flooring Services</h2>
-        <p class="mt-3 text-walnut-600">Ask Michael AI about any of these services to get a preliminary estimate instantly.</p>
+        <p class="mt-3 text-walnut-600">Chat with Michael AI to get a transparent, exact estimate for any of these services.</p>
       </div>
       <div class="grid md:grid-cols-3 gap-6" id="services-grid">
-        <!-- populated by app.js from /api/estimate/services, with static fallback below -->
-        ${serviceCard('fa-broom', 'Floor Sanding & Refinishing', 'Restore worn hardwood to its natural beauty with complete sanding and a durable finish.', '$3.00/sq ft')}
-        ${serviceCard('fa-palette', 'Sanding + Stain + Finish', 'Sanding plus a custom stain color of your choice, sealed with a lasting finish.', '$3.50/sq ft')}
-        ${serviceCard('fa-hammer', 'Hardwood Installation', 'Full installation, sanding & finish for new hardwood floors. Labor only.', '$4.50/sq ft')}
-        ${serviceCard('fa-layer-group', 'Prefinished Hardwood Installation', 'Professional installation of prefinished hardwood. Labor only.', '$2.50/sq ft')}
-        ${serviceCard('fa-th-large', 'Pergo / Laminate Installation', 'Expert installation of Pergo or laminate flooring. Labor only.', '$2.50/sq ft')}
-        ${serviceCard('fa-wrench', 'Repairs', 'Every repair is unique — we provide an accurate quote after an in-person evaluation.', 'In-person quote')}
+        ${serviceCard('fa-broom', 'Sanding & Refinishing — Natural Look', 'Restore worn hardwood to its natural beauty with complete sanding and a durable 3-coat finish.', '$3.50/sq ft')}
+        ${serviceCard('fa-palette', 'Sanding & Refinishing — Custom Stain', 'Sanding plus a custom stain color of your choice, with 2 or 3 finish coats.', 'From $3.50/sq ft')}
+        ${serviceCard('fa-hammer', 'Red Oak Installation 2 1/4"', 'Professional installation of new Red Oak hardwood flooring. Labor only.', '$3.75/sq ft')}
+        ${serviceCard('fa-layer-group', 'Prefinished Hardwood Installation', 'Professional installation of prefinished hardwood. Labor only.', '$2.75/sq ft')}
+        ${serviceCard('fa-th-large', 'Pergo / Laminate Installation', 'Expert installation of Pergo or laminate flooring. Labor only.', '$3.00/sq ft')}
+        ${serviceCard("fa-wrench", "Repairs & Custom Projects", "Every situation is unique — chat with Michael AI and we'll schedule a specialist visit, no obligation.", "In-person quote")}
       </div>
     </div>
   </section>
 
   <!-- CALCULATOR TEASER -->
-  <section id="estimate" class="py-16 bg-white">
+  <section id="estimate" class="py-16 bg-walnut-50">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="font-serif text-3xl sm:text-4xl font-bold text-walnut-900">Curious What Your Project Might Cost?</h2>
-      <p class="mt-3 text-walnut-600">Chat with Michael AI — our hardwood flooring specialist assistant — and get a transparent preliminary estimate in minutes.</p>
-      <button id="estimate-cta-btn" class="mt-8 bg-forest-600 hover:bg-forest-700 text-white font-semibold px-8 py-4 rounded-lg transition shadow-lg shadow-forest-600/20">
-        <i class="fas fa-calculator mr-2"></i> Get My Hardwood Floor Estimate
-      </button>
-      <p class="mt-4 text-xs text-walnut-400 max-w-xl mx-auto">Our estimates are based on the information you provide, including measurements and project details. A final confirmation happens during a free in-person evaluation.</p>
+      <h2 class="font-serif text-3xl sm:text-4xl font-bold text-walnut-900">Know Your Investment Before You Decide</h2>
+      <p class="mt-3 text-walnut-600">Michael AI walks you through a few simple questions and gives you an exact estimate — no ranges, no guessing.</p>
+      <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+        <button id="estimate-cta-btn" class="bg-forest-600 hover:bg-forest-700 text-white font-semibold px-8 py-4 rounded-lg transition shadow-lg shadow-forest-600/20">
+          <i class="fas fa-calculator mr-2"></i> Get My Estimate
+        </button>
+        <a href="tel:+19145550142" class="border border-walnut-300 hover:border-walnut-500 text-walnut-800 font-semibold px-8 py-4 rounded-lg transition">
+          <i class="fas fa-phone mr-2"></i> Call Now
+        </a>
+      </div>
+      <p class="mt-4 text-xs text-walnut-400 max-w-xl mx-auto">This estimate is based on your measurements and selections. Your flooring specialist will visit to confirm measurements and floor conditions — if everything matches, this is the price we honor.</p>
     </div>
   </section>
 
@@ -125,10 +172,10 @@ pages.get('/', (c) => {
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="font-serif text-3xl sm:text-4xl font-bold text-walnut-900 text-center mb-10">Frequently Asked Questions</h2>
       <div class="space-y-4">
-        ${faqItem('Is the online estimate final?', 'No. It is a preliminary estimate based on the information you provide. If the square footage and floor condition match what you told us, this is the same pricing you can expect after our specialist evaluation — the in-person visit is only to confirm measurements and floor condition.')}
-        ${faqItem('Do prices include materials?', 'For sanding & refinishing services, yes. For hardwood, prefinished, and laminate installation, our pricing is labor only — material costs are separate and depend on the product you select.')}
-        ${faqItem('Can I get a quote for repairs online?', 'Repairs always require an in-person evaluation because every situation is different. We are happy to schedule a specialist visit at no obligation.')}
-        ${faqItem('How do I schedule an appointment?', 'After chatting with Michael AI and getting your estimate, you can choose a preferred day and time window (mornings, midday, or afternoon) and our team will confirm availability with you directly.')}
+        ${faqItem('Is the online estimate final?', 'It is an exact estimate based on the information you provide — not a vague range. If the square footage and floor condition match what you told us, this is the same pricing you can expect after our specialist evaluation — the in-person visit is only to confirm measurements and floor condition.')}
+        ${faqItem('Do prices include materials?', 'For sanding & refinishing services, yes. For Red Oak, prefinished, and laminate installation, our pricing is labor only — material costs are separate and depend on the product you select.')}
+        ${faqItem("Can I get a quote for repairs online?", "Repairs always require an in-person evaluation because every situation is different. Chat with Michael AI and we'll happily schedule a specialist visit at no obligation.")}
+        ${faqItem("How do I schedule an appointment?", "After getting your estimate from Michael AI, choose whether you'd like to schedule a visit (pick a preferred day and time window) or have a specialist call you directly — our team will confirm right away.")}
       </div>
     </div>
   </section>
@@ -137,10 +184,15 @@ pages.get('/', (c) => {
   <section class="py-16 bg-walnut-900">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white">Ready to See What's Possible for Your Floors?</h2>
-      <p class="mt-3 text-walnut-300">Talk to Michael AI now — no obligation, no pressure, just honest answers.</p>
-      <button id="final-cta-btn" class="mt-8 bg-white text-walnut-900 hover:bg-walnut-100 font-semibold px-8 py-4 rounded-lg transition">
-        <i class="fas fa-comment-dots mr-2"></i> Chat With Michael AI
-      </button>
+      <p class="mt-3 text-walnut-300">Get your exact estimate in under 5 minutes — no obligation, no pressure, just honest answers.</p>
+      <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+        <button id="final-cta-btn" class="bg-white text-walnut-900 hover:bg-walnut-100 font-semibold px-8 py-4 rounded-lg transition">
+          <i class="fas fa-comment-dots mr-2"></i> Get My Estimate
+        </button>
+        <a href="tel:+19145550142" class="border border-walnut-600 hover:border-walnut-400 text-white font-semibold px-8 py-4 rounded-lg transition">
+          <i class="fas fa-phone mr-2"></i> Call Now
+        </a>
+      </div>
     </div>
   </section>
   `
@@ -314,6 +366,5 @@ function faqItem(q: string, a: string) {
   </details>`
 }
 
-const HERO_IMAGE = 'https://sspark.genspark.ai/cfimages?u1=Yul05SAPxtE9rEfDLswBhZrMv9YG5eovBgddFss2ByRGgMq0xxyzg%2FJuaQKqiH1JIfY5smw2rs2JEBEkgLP5nDQvRAotGXvD%2Fx3Xw6e01pGxdov503jNkbAwiX7b4QoUCN5zM7hwq7WpF8NQ2i9cmRQu5nQf&u2=IX3PJ8CEu1JeYPl7&width=2560'
 
 export default pages

@@ -3,155 +3,141 @@
 // IMPORTANT: All pricing math happens here in code, NEVER
 // left to the LLM to "calculate" — guarantees accuracy and
 // consistency with the business rules defined by the client.
+//
+// PRICING RULES (confirmed by client, updated 2026-07-20):
+// - Natural Look (always 3 coats: 1 sealer + 2 finish)  = $3.50/sq ft
+// - Custom Stain + 2 coats finish                        = $3.50/sq ft
+// - Custom Stain + 3 coats finish                         = $4.00/sq ft
+// - Red Oak Installation 2 1/4" (labor only)               = $3.75/sq ft
+// - Prefinished Hardwood Installation (labor only)         = $2.75/sq ft
+// - Pergo / Laminate Installation (labor only)             = $3.00/sq ft
+// NOTE: "Repairs" service removed from the guided flow — always requires
+// in-person evaluation, handled as a free-text fallback in the assistant.
 // ============================================================
 
 export type ServiceKey =
-  | 'sanding_refinishing'
-  | 'sanding_stain_finish'
+  | 'sanding_refinishing_natural'
+  | 'sanding_refinishing_stain'
+  | 'hardwood_install'
   | 'prefinished_install'
   | 'laminate_install'
-  | 'hardwood_install'
-  | 'repairs'
+
+export type FinishCoats = 2 | 3
 
 export interface ServiceDefinition {
   key: ServiceKey
   label: string
-  basePricePerSqFt: number | null // null => repairs, no online pricing
   laborOnly: boolean
   includes: string[]
   description: string
+  hasFinishCoatChoice: boolean // whether the 2 vs 3 coats question applies
 }
 
 export const SERVICES: Record<ServiceKey, ServiceDefinition> = {
-  sanding_refinishing: {
-    key: 'sanding_refinishing',
-    label: 'Floor Sanding & Refinishing',
-    basePricePerSqFt: 3.0,
+  sanding_refinishing_natural: {
+    key: 'sanding_refinishing_natural',
+    label: 'Sanding & Refinishing — Natural Look',
     laborOnly: false,
-    includes: [
-      'Complete sanding',
-      'One coat sealer',
-      'Two coats oil-based finish (3 coats total protection)'
-    ],
+    includes: ['Complete sanding', 'One coat sealer', 'Two coats oil-based finish (3 coats total protection)'],
     description:
-      'We sand down your existing floors and apply a fresh, durable finish to restore their natural beauty.'
+      'We sand down your existing floors and apply a fresh, durable natural finish to restore their true wood beauty.',
+    hasFinishCoatChoice: false // natural always includes 3 coats total, no choice needed
   },
-  sanding_stain_finish: {
-    key: 'sanding_stain_finish',
-    label: 'Sanding + Stain + Finish',
-    basePricePerSqFt: 3.5,
+  sanding_refinishing_stain: {
+    key: 'sanding_refinishing_stain',
+    label: 'Sanding & Refinishing — Custom Stain',
     laborOnly: false,
-    includes: [
-      'Sanding',
-      'Stain application (custom color)',
-      'One coat sealer',
-      'Two coats oil-based finish'
-    ],
+    includes: ['Sanding', 'Custom stain color application', 'One coat sealer', 'Finish coats (2 or 3)'],
     description:
-      'Same as our sanding & refinishing service, plus a custom stain color of your choice.'
+      'Same as our sanding & refinishing service, plus a custom stain color of your choice.',
+    hasFinishCoatChoice: true
+  },
+  hardwood_install: {
+    key: 'hardwood_install',
+    label: 'Red Oak Installation 2 1/4"',
+    laborOnly: true,
+    includes: ['Professional installation labor (Red Oak 2 1/4")'],
+    description:
+      'Installation of new Red Oak 2 1/4" hardwood flooring. Labor only — material cost is separate.',
+    hasFinishCoatChoice: false
   },
   prefinished_install: {
     key: 'prefinished_install',
     label: 'Prefinished Hardwood Installation',
-    basePricePerSqFt: 2.5,
     laborOnly: true,
     includes: ['Professional installation labor'],
     description:
-      'Installation of prefinished hardwood flooring. Labor only — material cost is separate and depends on the product you choose.'
+      'Installation of prefinished hardwood flooring. Labor only — material cost is separate and depends on the product you choose.',
+    hasFinishCoatChoice: false
   },
   laminate_install: {
     key: 'laminate_install',
     label: 'Pergo / Laminate Installation',
-    basePricePerSqFt: 2.5,
     laborOnly: true,
     includes: ['Professional installation labor'],
     description:
-      'Installation of Pergo or laminate flooring. Labor only — material cost is separate and depends on the product you choose.'
-  },
-  hardwood_install: {
-    key: 'hardwood_install',
-    label: 'Hardwood Installation + Sanding + Finish',
-    basePricePerSqFt: 4.5,
-    laborOnly: true,
-    includes: ['Installation', 'Sanding', 'Finish application labor'],
-    description:
-      'Full installation of new hardwood flooring, including sanding and finishing. Labor only — material cost is separate.'
-  },
-  repairs: {
-    key: 'repairs',
-    label: 'Repairs',
-    basePricePerSqFt: null,
-    laborOnly: true,
-    includes: [],
-    description:
-      'Repairs require an in-person evaluation because every situation is different. We would be happy to schedule a specialist visit.'
+      'Installation of Pergo or laminate flooring. Labor only — material cost is separate and depends on the product you choose.',
+    hasFinishCoatChoice: false
+  }
+}
+
+function basePricePerSqFt(service: ServiceKey, finishCoats?: FinishCoats): number {
+  switch (service) {
+    case 'sanding_refinishing_natural':
+      return 3.5 // always 3 coats total, no surcharge tiering
+    case 'sanding_refinishing_stain':
+      return finishCoats === 3 ? 4.0 : 3.5
+    case 'hardwood_install':
+      return 3.75
+    case 'prefinished_install':
+      return 2.75
+    case 'laminate_install':
+      return 3.0
+    default:
+      throw new Error('Unknown service type')
   }
 }
 
 export interface EstimateInput {
   service: ServiceKey
   squareFootage: number
-  extraCoat?: boolean // true => 3 coats instead of 2 (only relevant for refinishing services)
+  finishCoats?: FinishCoats // only relevant for sanding_refinishing_stain
 }
 
 export interface EstimateResult {
   service: ServiceDefinition
   squareFootage: number
-  pricePerSqFt: number | null
-  low: number | null
-  high: number | null
+  pricePerSqFt: number
+  total: number
   laborOnly: boolean
-  requiresInPersonEvaluation: boolean
+  finishCoats?: FinishCoats
   disclaimer: string
 }
 
-const EXTRA_COAT_SURCHARGE_PER_SQFT = 0.35 // additional protection coat surcharge
-
 export function calculateEstimate(input: EstimateInput): EstimateResult {
   const service = SERVICES[input.service]
-
   if (!service) {
     throw new Error('Unknown service type')
   }
 
-  if (service.key === 'repairs' || service.basePricePerSqFt === null) {
-    return {
-      service,
-      squareFootage: input.squareFootage,
-      pricePerSqFt: null,
-      low: null,
-      high: null,
-      laborOnly: true,
-      requiresInPersonEvaluation: true,
-      disclaimer:
-        'Repairs require an in-person evaluation because every situation is different. We would be happy to schedule a specialist visit.'
-    }
-  }
-
   const sqft = Math.max(0, Number(input.squareFootage) || 0)
-  let pricePerSqFt = service.basePricePerSqFt
-
-  if (input.extraCoat && (service.key === 'sanding_refinishing' || service.key === 'sanding_stain_finish')) {
-    pricePerSqFt += EXTRA_COAT_SURCHARGE_PER_SQFT
-  }
-
-  const exact = sqft * pricePerSqFt
-  // Provide a small transparent range (+/-5%) since this is a preliminary estimate
-  const low = Math.round(exact * 0.95)
-  const high = Math.round(exact * 1.05)
+  const pricePerSqFt = basePricePerSqFt(input.service, input.finishCoats)
+  const total = Math.round(sqft * pricePerSqFt)
 
   return {
     service,
     squareFootage: sqft,
     pricePerSqFt,
-    low,
-    high,
+    total,
     laborOnly: service.laborOnly,
-    requiresInPersonEvaluation: false,
+    finishCoats: service.hasFinishCoatChoice ? input.finishCoats : undefined,
     disclaimer:
-      'Our estimates are based on the information you provide, including measurements and project details. If the square footage and floor condition match the information provided, this is the same pricing you can expect after our specialist evaluation. Our visit is only to verify measurements, evaluate floor condition, and make sure there are no surprises.'
+      'This estimate is based on the measurements and project details you provided. Your flooring specialist will visit to confirm measurements and floor condition — if everything matches what you told us, this is the price we honor.'
   }
 }
+
+export const REPAIRS_MESSAGE =
+  'Repairs require an in-person evaluation because every situation is different. We would be happy to schedule a specialist visit at no obligation.'
 
 export function formatCurrency(n: number): string {
   return new Intl.NumberFormat('en-US', {

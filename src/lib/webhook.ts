@@ -13,14 +13,15 @@ export interface LeadPayload {
   service?: string
   squareFootage?: number
   finishOption?: string
-  estimateLow?: number | null
-  estimateHigh?: number | null
+  finishCoats?: number
+  estimateTotal?: number | null
   laborOnly?: boolean
   appointmentDayPref?: string
   appointmentWindow?: string
   photoUrls?: string[]
   conversationSummary?: string
   consentContact?: boolean
+  wantsCallNow?: boolean
 }
 
 export async function sendLeadNotification(accessKey: string, lead: LeadPayload): Promise<{ ok: boolean; error?: string }> {
@@ -29,9 +30,9 @@ export async function sendLeadNotification(accessKey: string, lead: LeadPayload)
   }
 
   const estimateText =
-    lead.estimateLow != null && lead.estimateHigh != null
-      ? `$${lead.estimateLow} - $${lead.estimateHigh}${lead.laborOnly ? ' (labor only, materials not included)' : ''}`
-      : 'Requires in-person evaluation (repairs)'
+    lead.estimateTotal != null
+      ? `$${lead.estimateTotal}${lead.laborOnly ? ' (labor only, materials not included)' : ''}`
+      : 'Requires in-person evaluation'
 
   const message = `
 NEW HARDWOOD FLOORING LEAD
@@ -44,11 +45,12 @@ City: ${lead.city || 'N/A'}
 
 Service Selected: ${lead.service || 'N/A'}
 Square Footage: ${lead.squareFootage ?? 'N/A'}
-Finish Option: ${lead.finishOption || 'N/A'}
+Finish Option: ${lead.finishOption || 'N/A'}${lead.finishCoats ? ` (${lead.finishCoats} coats)` : ''}
 Estimated Investment: ${estimateText}
 
 Preferred Appointment Day(s): ${lead.appointmentDayPref || 'N/A'}
 Preferred Time Window: ${lead.appointmentWindow || 'N/A'}
+Wants a call now: ${lead.wantsCallNow ? 'YES - call ASAP' : 'No, scheduled visit preferred'}
 
 Photos: ${lead.photoUrls && lead.photoUrls.length ? lead.photoUrls.join(', ') : 'None uploaded'}
 

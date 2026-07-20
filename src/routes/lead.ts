@@ -8,9 +8,9 @@ type Bindings = {
 
 const lead = new Hono<{ Bindings: Bindings }>()
 
-// Structured, compliance-safe lead submission (used by the "Schedule My Evaluation" form).
-// This does NOT rely on the LLM deciding whether consent was given — the checkbox is a real
-// UI element the user must check, matching Google Ads / TCPA requirements.
+// Structured, compliance-safe lead submission (used by the "Schedule My Evaluation" /
+// "Call Me Now" form at the end of the guided wizard). Consent is a real checkbox the
+// user must check — never inferred by the AI.
 lead.post('/submit', async (c) => {
   const { env } = c
   const body = await c.req.json().catch(() => ({}))
@@ -24,14 +24,15 @@ lead.post('/submit', async (c) => {
     service,
     squareFootage,
     finishOption,
-    estimateLow,
-    estimateHigh,
+    finishCoats,
+    estimateTotal,
     laborOnly,
     appointmentDayPref,
     appointmentWindow,
     photoUrls,
     conversationSummary,
-    consentContact
+    consentContact,
+    wantsCallNow
   } = body
 
   if (!name || (!phone && !email)) {
@@ -44,8 +45,8 @@ lead.post('/submit', async (c) => {
 
   try {
     await env.DB.prepare(
-      `INSERT INTO leads (name, phone, email, address, city, service, square_footage, finish_option, estimate_low, estimate_high, labor_only, appointment_day_pref, appointment_window, photos_json, conversation_summary, consent_contact)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO leads (name, phone, email, address, city, service, square_footage, finish_option, finish_coats, estimate_total, labor_only, appointment_day_pref, appointment_window, photos_json, conversation_summary, consent_contact, wants_call_now)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
       .bind(
         name || null,
@@ -56,14 +57,15 @@ lead.post('/submit', async (c) => {
         service || null,
         squareFootage ?? null,
         finishOption || null,
-        estimateLow ?? null,
-        estimateHigh ?? null,
+        finishCoats ?? null,
+        estimateTotal ?? null,
         laborOnly ? 1 : 0,
         appointmentDayPref || null,
         appointmentWindow || null,
         JSON.stringify(photoUrls || []),
         conversationSummary || null,
-        consentContact ? 1 : 0
+        consentContact ? 1 : 0,
+        wantsCallNow ? 1 : 0
       )
       .run()
   } catch (err) {
@@ -79,14 +81,15 @@ lead.post('/submit', async (c) => {
     service,
     squareFootage,
     finishOption,
-    estimateLow,
-    estimateHigh,
+    finishCoats,
+    estimateTotal,
     laborOnly,
     appointmentDayPref,
     appointmentWindow,
     photoUrls,
     conversationSummary,
-    consentContact
+    consentContact,
+    wantsCallNow
   })
 
   return c.json({ success: true, notified: notifyResult.ok, notifyError: notifyResult.error })
