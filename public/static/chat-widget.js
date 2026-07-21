@@ -219,7 +219,7 @@
       addUserMessage('New Hardwood Installation')
       clearActions()
       ackThenAsk(
-        "Great choice — new hardwood adds real value to a home.",
+        "Great choice — new hardwood installation is one of the best investments you can make in a home.",
         'Which type of installation are you considering?',
         renderInstallTypeStep
       )
@@ -253,19 +253,25 @@
 
     if (key === 'sanding_refinishing_stain') {
       ackThenAsk(
-        "Custom stain is a beautiful way to personalize your floors.",
-        'How many coats of finish would you like?',
+        "Custom stain is a beautiful way to personalize your floors, and it's one of our most requested services.",
+        'Now let\'s talk about protection. How many coats of finish would you like?',
         renderFinishCoatsStep
       )
     } else if (key === 'repair') {
       ackThenAsk(
-        "Got it — repairs are common, and every situation is a little different.",
+        "Got it — repairs are common, and every situation is a little different, so I want to make sure I understand the scope.",
         "Approximately how many square feet does the affected area cover?",
         renderSquareFootageStep
       )
     } else {
+      const niceties = {
+        sanding_refinishing_natural: "Great choice. Sanding & refinishing is one of our most requested services — it can completely transform a tired floor.",
+        hardwood_install: "Red oak is a timeless choice that holds up beautifully for decades.",
+        prefinished_install: "Prefinished hardwood is a great option — durable, and ready to enjoy right after installation.",
+        laminate_install: "Laminate is a smart, budget-friendly way to get the hardwood look."
+      }
       ackThenAsk(
-        "Perfect, that helps me understand the scope.",
+        (niceties[key] || "Perfect, that helps me understand the scope.") + " Now let's estimate the size of your project.",
         'Approximately how many square feet of flooring are you looking to complete?',
         renderSquareFootageStep
       )
@@ -291,7 +297,7 @@
     addUserMessage(coats + ' Coats')
     clearActions()
     ackThenAsk(
-      coats === 3 ? "Good call — extra protection is worth it for busy rooms." : "Sounds good.",
+      (coats === 3 ? "Good call — extra protection is worth it for busy rooms." : "Sounds good.") + " Now let's estimate the size of your project.",
       'Approximately how many square feet of flooring are you looking to complete?',
       renderSquareFootageStep
     )
@@ -378,9 +384,17 @@
   // Common continuation after square footage is known (typed or estimated)
   function afterSquareFootage(sqft) {
     wizard.squareFootage = sqft
+    let sizeNote
+    if (sqft < 250) {
+      sizeNote = "Got it. That's a nice, manageable size for this kind of project."
+    } else if (sqft < 700) {
+      sizeNote = "Got it. That's a very common project size — we see this a lot."
+    } else {
+      sizeNote = "Got it. That's a substantial project — good thing we plan for it carefully."
+    }
     ackThenAsk(
-      "Perfect, that's exactly what I needed.",
-      'How soon would you like to start?',
+      sizeNote + ' One last question —',
+      'how soon would you like to start?',
       renderTimelineStep
     )
   }
@@ -408,7 +422,7 @@
     clearActions()
     ackThenAsk(
       value === 'ASAP' ? "Understood — we'll treat this as a priority." : "Good to know, thank you.",
-      'Which city is the project located in?',
+      'And just to make sure we schedule the right team for your area — which city is the project located in?',
       renderCityStep
     )
   }
@@ -447,8 +461,20 @@
     respondAfterThinking(() => {
       addAssistantMessage('Great.')
       setTimeout(() => {
-        addAssistantMessage("Based on everything you shared, I've prepared your estimated investment.")
-        proceedToEstimate()
+        if (!wizard.isRepair) {
+          const fitPhrase = {
+            sanding_refinishing_natural: 'refinishing',
+            sanding_refinishing_stain: 'a custom stain refinish',
+            hardwood_install: 'a new hardwood installation',
+            prefinished_install: 'a new hardwood installation',
+            laminate_install: 'a new laminate installation'
+          }[wizard.service] || 'this project'
+          addAssistantMessage(`Based on what you've shared, your floors appear to be a great candidate for ${fitPhrase}.`)
+        }
+        setTimeout(() => {
+          addAssistantMessage(wizard.isRepair ? "Here's what I'd recommend:" : "Here's your estimated investment:")
+          proceedToEstimate()
+        }, wizard.isRepair ? 0 : 500)
       }, 500)
     })
   }
