@@ -292,7 +292,7 @@ pages.get('/privacy-policy', (c) => {
         <p>Westchester Hardwood Experts ("we", "us", or "our") operates this website (the "Site") and the Michael AI conversational assistant. This Privacy Policy explains how we collect, use, and protect information you provide to us.</p>
 
         <h2 class="text-xl font-bold text-walnut-900 mt-8">Information We Collect</h2>
-        <p>When you interact with Michael AI or submit a form, we may collect: your name, phone number, email address, home address, city, project details (service type, square footage, finish preferences), photos of your flooring, and your preferred appointment window.</p>
+        <p>When you interact with Michael AI or submit a form, we may collect: your name, phone number, email address, home address, city, project details (service type, square footage, finish preferences), and your preferred appointment window.</p>
 
         <h2 class="text-xl font-bold text-walnut-900 mt-8">How We Use Your Information</h2>
         <ul class="list-disc pl-6 space-y-1">
@@ -301,9 +301,6 @@ pages.get('/privacy-policy', (c) => {
           <li>To contact you by phone, text, or email regarding your project</li>
           <li>To improve our services and website experience</li>
         </ul>
-
-        <h2 class="text-xl font-bold text-walnut-900 mt-8">Photo Uploads</h2>
-        <p>Photos you upload are used solely to help our team understand your floor's condition ahead of your evaluation. Photos are stored securely and are not shared with third parties or used for marketing without your consent.</p>
 
         <h2 class="text-xl font-bold text-walnut-900 mt-8">Communication Consent</h2>
         <p>By submitting your information, you consent to receive calls and text messages from us about your project. Consent is not a condition of purchase. Message and data rates may apply. You may opt out at any time by replying STOP to text messages or requesting removal by phone or email.</p>
@@ -347,9 +344,6 @@ pages.get('/terms-of-service', (c) => {
 
         <h2 class="text-xl font-bold text-walnut-900 mt-8">Use of the AI Assistant</h2>
         <p>Michael AI is an automated assistant designed to help you understand hardwood flooring options. It is not a substitute for professional in-person inspection. Information provided is for general educational purposes and project qualification only.</p>
-
-        <h2 class="text-xl font-bold text-walnut-900 mt-8">Photo Submissions</h2>
-        <p>By uploading photos, you confirm you have the right to share them and grant us permission to view them solely for the purpose of evaluating your flooring project.</p>
 
         <h2 class="text-xl font-bold text-walnut-900 mt-8">Limitation of Liability</h2>
         <p>We are not liable for any decisions made solely based on preliminary online estimates. All work is subject to a separate written agreement following in-person evaluation.</p>

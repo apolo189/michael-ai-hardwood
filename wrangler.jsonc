@@ -10,13 +10,7 @@
     {
       "binding": "DB",
       "database_name": "michael-ai-hardwood-production",
-      "database_id": "PLACEHOLDER_WILL_BE_SET_ON_DEPLOY"
-    }
-  ],
-  "r2_buckets": [
-    {
-      "binding": "PHOTOS",
-      "bucket_name": "michael-ai-hardwood-photos"
+      "database_id": "c4390bab-6ac2-4895-b04d-477cf75ecd13"
     }
   ]
 }

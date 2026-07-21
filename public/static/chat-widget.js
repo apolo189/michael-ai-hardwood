@@ -13,7 +13,6 @@
     service: null, // 'sanding_refinishing_natural' | 'sanding_refinishing_stain' | 'hardwood_install' | 'prefinished_install' | 'laminate_install'
     finishCoats: null, // 2 | 3 (only for stain)
     squareFootage: null,
-    photoUrls: [],
     estimate: null,
     transcript: [] // {role, content} for the lead's conversation summary
   }
@@ -244,57 +243,8 @@
     addUserMessage(sqft + ' sq ft')
     clearActions()
     setTimeout(() => {
-      addAssistantMessage('Would you like to upload a few photos of your floors? This helps us understand your project before the visit — totally optional.')
-      renderPhotoStep()
-    }, 300)
-  }
-
-  function renderPhotoStep() {
-    setActions(`
-      <div class="space-y-2">
-        <label class="block cursor-pointer border border-walnut-200 hover:border-walnut-500 rounded-xl px-4 py-3 text-sm font-medium text-walnut-700 text-center transition">
-          <input id="photo-input" type="file" accept="image/*" multiple class="hidden">
-          <i class="fas fa-camera mr-2 text-walnut-500"></i> Upload Photos
-        </label>
-        <button id="skip-photos-btn" class="w-full text-walnut-400 text-xs underline py-1">Skip for now</button>
-        <div id="photo-preview" class="flex flex-wrap gap-2"></div>
-      </div>
-    `)
-    document.getElementById('photo-input').addEventListener('change', onPhotoSelected)
-    document.getElementById('skip-photos-btn').addEventListener('click', () => {
-      addUserMessage('Skip photo upload')
-      clearActions()
       proceedToEstimate()
-    })
-  }
-
-  async function onPhotoSelected(e) {
-    const files = Array.from(e.target.files || [])
-    if (!files.length) return
-
-    for (const file of files) {
-      const formData = new FormData()
-      formData.append('photo', file)
-      try {
-        const res = await axios.post('/api/upload/photo', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-        if (res.data && res.data.key) {
-          wizard.photoUrls.push(res.data.key)
-          const preview = document.getElementById('photo-preview')
-          if (preview) {
-            preview.insertAdjacentHTML('beforeend', `<span class="text-xs bg-forest-50 text-forest-700 rounded-full px-3 py-1"><i class="fas fa-check mr-1"></i>Photo added</span>`)
-          }
-        }
-      } catch (err) {
-        // fail silently per-photo, continue
-      }
-    }
-
-    addUserMessage(`📷 Uploaded ${wizard.photoUrls.length} photo(s)`)
-    setTimeout(() => {
-      const btn = el('<button id="continue-after-photo-btn" class="w-full bg-walnut-500 hover:bg-walnut-600 text-white font-semibold py-2.5 rounded-lg text-sm mt-2">Continue</button>')
-      document.getElementById('chat-actions').appendChild(btn)
-      btn.addEventListener('click', () => { clearActions(); proceedToEstimate() })
-    }, 100)
+    }, 300)
   }
 
   async function proceedToEstimate() {
@@ -429,8 +379,6 @@ Preferred Appointment Day(s): ${payload.appointmentDayPref || 'N/A'}
 Preferred Time Window: ${payload.appointmentWindow || 'N/A'}
 Wants a call now: ${payload.wantsCallNow ? 'YES - call ASAP' : 'No, scheduled visit preferred'}
 
-Photos: ${payload.photoUrls && payload.photoUrls.length ? payload.photoUrls.join(', ') : 'None uploaded'}
-
 Contact Consent (TCPA): ${payload.consentContact ? 'YES - customer agreed to be contacted by phone/text' : 'NOT CONFIRMED'}
 
 --- Conversation Summary ---
@@ -466,7 +414,6 @@ ${payload.conversationSummary || 'N/A'}
       appointmentDayPref: wantsCallNow ? '' : formData.get('appointmentDayPref'),
       appointmentWindow: wantsCallNow ? '' : formData.get('appointmentWindow'),
       consentContact: formData.get('consentContact') === 'on',
-      photoUrls: wizard.photoUrls,
       conversationSummary: wizard.transcript.map((m) => `${m.role}: ${m.content}`).join('\n'),
       service: serviceLabel,
       squareFootage: wizard.squareFootage,
@@ -553,5 +500,69 @@ ${payload.conversationSummary || 'N/A'}
   }
 
   window.openMichaelChat = openChat
+  document.addEventListener('DOMContentLoaded', renderRoot)
+})()
+orm.closest('.bg-white').outerHTML = `<div class="flex justify-start"><div class="chat-bubble-assistant px-4 py-3 max-w-[85%] text-sm">${confirmMsg}</div></div>`
+      } else {
+        throw new Error(res.data?.error || 'Unknown error')
+      }
+    } catch (err) {
+      errorEl.textContent = 'Something went wrong. Please try again or call us at (914) 316-2170.'
+      errorEl.classList.remove('hidden')
+      submitBtn.disabled = false
+      submitBtn.textContent = wantsCallNow ? 'Request My Call' : 'Confirm Request'
+    }
+  }
+
+  // ---------------------------------------------------------
+  // FREE TEXT FALLBACK (off-script questions, repairs, etc.)
+  // ---------------------------------------------------------
+
+  async function onFreeTextSubmit(e) {
+    e.preventDefault()
+    const input = document.getElementById('chat-text-input')
+    const text = input.value.trim()
+    if (!text) return
+    input.value = ''
+    addUserMessage(text)
+    addTypingIndicator()
+
+    try {
+      const res = await axios.post('/api/chat/message', {
+        messages: wizard.transcript.map((m) => ({ role: m.role, content: m.content }))
+      })
+      removeTypingIndicator()
+      const data = res.data
+      addAssistantMessage(data.reply || "Could you tell me a bit more?")
+    } catch (err) {
+      removeTypingIndicator()
+      addAssistantMessage("Sorry, something went wrong. Please try again, or call us at (914) 316-2170.")
+    }
+  }
+
+  function addTypingIndicator() {
+    const container = document.getElementById('chat-messages')
+    const bubble = el(`
+      <div id="typing-indicator" class="flex justify-start">
+        <div class="chat-bubble-assistant px-4 py-3 flex gap-1">
+          <span class="typing-dot w-1.5 h-1.5 bg-walnut-400 rounded-full inline-block"></span>
+          <span class="typing-dot w-1.5 h-1.5 bg-walnut-400 rounded-full inline-block"></span>
+          <span class="typing-dot w-1.5 h-1.5 bg-walnut-400 rounded-full inline-block"></span>
+        </div>
+      </div>
+    `)
+    container.appendChild(bubble)
+    scrollToBottom()
+  }
+
+  function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator')
+    if (indicator) indicator.remove()
+  }
+
+  window.openMichaelChat = openChat
+  document.addEventListener('DOMContentLoaded', renderRoot)
+})()
+MichaelChat = openChat
   document.addEventListener('DOMContentLoaded', renderRoot)
 })()
