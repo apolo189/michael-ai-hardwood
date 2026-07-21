@@ -1,21 +1,34 @@
 // ============================================================
-// Michael AI — Guided Estimate Wizard
+// Michael AI — Guided Estimate Wizard (Consultant Flow v3)
 // 80% buttons / 20% free text. All pricing is calculated via
 // /api/estimate/calculate (deterministic backend), never by the
 // LLM. Free text is only sent to /api/chat/message as a fallback
 // for off-script questions.
+//
+// v3 goal: Michael should feel like an experienced flooring
+// consultant qualifying a project, not a form/calculator. Every
+// assistant reply waits at least THINKING_DELAY_MS (with a visible
+// typing indicator) before appearing, and each answer gets a short
+// acknowledgment before the next question — deliberately paced.
 // ============================================================
 
 (function () {
   const SESSION_KEY = 'michael_ai_session_id'
+  const THINKING_DELAY_MS = 5000 // minimum "thinking" pause before Michael replies
 
   const wizard = {
-    service: null, // 'sanding_refinishing_natural' | 'sanding_refinishing_stain' | 'hardwood_install' | 'prefinished_install' | 'laminate_install'
+    service: null, // 'sanding_refinishing_natural' | 'sanding_refinishing_stain' | 'hardwood_install' | 'prefinished_install' | 'laminate_install' | 'repair'
+    serviceLabel: null,
+    isRepair: false,
     finishCoats: null, // 2 | 3 (only for stain)
     squareFootage: null,
+    timeline: null, // 'ASAP' | 'Within 1 Week' | 'Within 2 Weeks' | 'Within 30 Days'
+    city: null,
     estimate: null,
     transcript: [] // {role, content} for the lead's conversation summary
   }
+
+  const ROOM_SIZE_SQFT = { Small: 120, Medium: 200, Large: 300 }
 
   function getSessionId() {
     let id = sessionStorage.getItem(SESSION_KEY)
@@ -136,41 +149,6 @@
     </button>`
   }
 
-  // ---------------------------------------------------------
-  // WIZARD FLOW
-  // ---------------------------------------------------------
-
-  function startWizard() {
-    addAssistantMessage("Hi, I'm Michael. I'll help you understand your hardwood flooring project.")
-    setTimeout(() => {
-      addAssistantMessage('What type of project are you looking for?')
-      renderServiceStep()
-    }, 350)
-  }
-
-  function renderServiceStep() {
-    setActions(`
-      <div id="service-options">
-        ${wireBtn('svc-natural', actionButton('Sanding & Refinishing (Natural Look)', 'fa-broom'))}
-        ${wireBtn('svc-stain', actionButton('Sanding & Refinishing (Custom Stain)', 'fa-palette'))}
-        ${wireBtn('svc-hardwood', actionButton('Hardwood Installation (Red Oak)', 'fa-hammer'))}
-        ${wireBtn('svc-prefinished', actionButton('Prefinished Hardwood Installation', 'fa-layer-group'))}
-        ${wireBtn('svc-laminate', actionButton('Pergo / Laminate Installation', 'fa-th-large'))}
-        <button id="svc-other" class="text-xs text-walnut-400 underline mt-1">Something else? Tell me about your project</button>
-      </div>
-    `)
-
-    bindClick('svc-natural', () => selectService('sanding_refinishing_natural', 'Sanding & Refinishing (Natural Look)'))
-    bindClick('svc-stain', () => selectService('sanding_refinishing_stain', 'Sanding & Refinishing (Custom Stain)'))
-    bindClick('svc-hardwood', () => selectService('hardwood_install', 'Hardwood Installation (Red Oak)'))
-    bindClick('svc-prefinished', () => selectService('prefinished_install', 'Prefinished Hardwood Installation'))
-    bindClick('svc-laminate', () => selectService('laminate_install', 'Pergo / Laminate Installation'))
-    bindClick('svc-other', () => {
-      clearActions()
-      addAssistantMessage("No problem — please describe your project below and I'll do my best to help, or we can schedule a specialist visit if needed.")
-    })
-  }
-
   function wireBtn(id, html) {
     return html.replace('class="wizard-btn', `id="${id}" class="wizard-btn`)
   }
@@ -180,23 +158,121 @@
     if (elNode) elNode.addEventListener('click', handler)
   }
 
+  // ---------------------------------------------------------
+  // PACING HELPER — every Michael reply waits at least
+  // THINKING_DELAY_MS with a visible typing indicator, so the
+  // conversation feels considered rather than instant/robotic.
+  // ---------------------------------------------------------
+  function respondAfterThinking(renderFn) {
+    addTypingIndicator()
+    setTimeout(() => {
+      removeTypingIndicator()
+      renderFn()
+    }, THINKING_DELAY_MS)
+  }
+
+  // Adds a short acknowledgment bubble, then (after a brief natural
+  // pause) the next question bubble, then renders that step's actions.
+  function ackThenAsk(ackText, questionText, renderStepFn) {
+    respondAfterThinking(() => {
+      addAssistantMessage(ackText)
+      setTimeout(() => {
+        addAssistantMessage(questionText)
+        renderStepFn()
+      }, 500)
+    })
+  }
+
+  // ---------------------------------------------------------
+  // WIZARD FLOW
+  // ---------------------------------------------------------
+
+  function startWizard() {
+    respondAfterThinking(() => {
+      addAssistantMessage("Hi, I'm Michael.")
+      setTimeout(() => {
+        addAssistantMessage("Before I calculate your investment, I'd like to understand your project so I can prepare the most accurate estimate possible.")
+        setTimeout(() => {
+          addAssistantMessage('What type of project are you planning?')
+          renderServiceStep()
+        }, 500)
+      }, 500)
+    })
+  }
+
+  // --- Q1: Service type ---
+
+  function renderServiceStep() {
+    setActions(`
+      <div id="service-options">
+        ${wireBtn('svc-natural', actionButton('Sanding & Refinishing (Natural)', 'fa-broom'))}
+        ${wireBtn('svc-stain', actionButton('Sanding & Custom Stain', 'fa-palette'))}
+        ${wireBtn('svc-install', actionButton('New Hardwood Installation', 'fa-hammer'))}
+        ${wireBtn('svc-repair', actionButton('Repair Hardwood Floors', 'fa-tools'))}
+        <button id="svc-other" class="text-xs text-walnut-400 underline mt-1">Something else? Tell me about your project</button>
+      </div>
+    `)
+
+    bindClick('svc-natural', () => selectService('sanding_refinishing_natural', 'Sanding & Refinishing (Natural)'))
+    bindClick('svc-stain', () => selectService('sanding_refinishing_stain', 'Sanding & Custom Stain'))
+    bindClick('svc-install', () => {
+      addUserMessage('New Hardwood Installation')
+      clearActions()
+      ackThenAsk(
+        "Great choice — new hardwood adds real value to a home.",
+        'Which type of installation are you considering?',
+        renderInstallTypeStep
+      )
+    })
+    bindClick('svc-repair', () => selectService('repair', 'Repair Hardwood Floors'))
+    bindClick('svc-other', () => {
+      clearActions()
+      addAssistantMessage("No problem — please describe your project below and I'll do my best to help, or we can schedule a specialist visit if needed.")
+    })
+  }
+
+  function renderInstallTypeStep() {
+    setActions(`
+      <div id="install-type-options">
+        ${wireBtn('install-redoak', actionButton('Red Oak Installation 2 1/4"', 'fa-hammer'))}
+        ${wireBtn('install-prefinished', actionButton('Prefinished Hardwood Installation', 'fa-layer-group'))}
+        ${wireBtn('install-laminate', actionButton('Pergo / Laminate Installation', 'fa-th-large'))}
+      </div>
+    `)
+    bindClick('install-redoak', () => selectService('hardwood_install', 'Red Oak Installation 2 1/4"'))
+    bindClick('install-prefinished', () => selectService('prefinished_install', 'Prefinished Hardwood Installation'))
+    bindClick('install-laminate', () => selectService('laminate_install', 'Pergo / Laminate Installation'))
+  }
+
   function selectService(key, label) {
     wizard.service = key
+    wizard.serviceLabel = label
+    wizard.isRepair = key === 'repair'
     addUserMessage(label)
     clearActions()
 
     if (key === 'sanding_refinishing_stain') {
-      setTimeout(() => {
-        addAssistantMessage('How many coats of finish would you like?')
-        renderFinishCoatsStep()
-      }, 300)
+      ackThenAsk(
+        "Custom stain is a beautiful way to personalize your floors.",
+        'How many coats of finish would you like?',
+        renderFinishCoatsStep
+      )
+    } else if (key === 'repair') {
+      ackThenAsk(
+        "Got it — repairs are common, and every situation is a little different.",
+        "Approximately how many square feet does the affected area cover?",
+        renderSquareFootageStep
+      )
     } else {
-      setTimeout(() => {
-        addAssistantMessage('Approximately how many square feet of flooring are you looking to complete?')
-        renderSquareFootageStep()
-      }, 300)
+      ackThenAsk(
+        "Perfect, that helps me understand the scope.",
+        'Approximately how many square feet of flooring are you looking to complete?',
+        renderSquareFootageStep
+      )
     }
   }
+
+  // --- Custom stain sub-question: finish coats ---
 
   function renderFinishCoatsStep() {
     setActions(`
@@ -214,19 +290,22 @@
     wizard.finishCoats = coats
     addUserMessage(coats + ' Coats')
     clearActions()
-    setTimeout(() => {
-      addAssistantMessage('Approximately how many square feet of flooring are you looking to complete?')
-      renderSquareFootageStep()
-    }, 300)
+    ackThenAsk(
+      coats === 3 ? "Good call — extra protection is worth it for busy rooms." : "Sounds good.",
+      'Approximately how many square feet of flooring are you looking to complete?',
+      renderSquareFootageStep
+    )
   }
+
+  // --- Q2: Square footage ---
 
   function renderSquareFootageStep() {
     setActions(`
       <form id="sqft-form" class="space-y-2">
-        <input id="sqft-input" type="number" min="1" step="1" placeholder="e.g. 800" required
+        <input id="sqft-input" type="number" min="1" step="1" placeholder="Enter square footage" required
           class="w-full border border-walnut-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-walnut-300">
-        <p class="text-xs text-walnut-400">Not sure? Measure the room's length × width, or estimate using walking steps — one normal step is about 2 feet.</p>
         <button type="submit" class="w-full bg-walnut-500 hover:bg-walnut-600 text-white font-semibold py-2.5 rounded-lg text-sm">Continue</button>
+        <button type="button" id="sqft-unsure-btn" class="w-full text-walnut-400 text-xs underline py-1">I don't know my square footage</button>
       </form>
     `)
     const form = document.getElementById('sqft-form')
@@ -234,21 +313,170 @@
       e.preventDefault()
       const val = Number(document.getElementById('sqft-input').value)
       if (!val || val <= 0) return
-      selectSquareFootage(val)
+      addUserMessage(val + ' sq ft')
+      clearActions()
+      afterSquareFootage(val)
+    })
+    bindClick('sqft-unsure-btn', () => {
+      addUserMessage("I don't know my square footage")
+      clearActions()
+      ackThenAsk(
+        "No problem, I can work with that.",
+        'How many rooms are we talking about?',
+        renderRoomsCountStep
+      )
     })
   }
 
-  function selectSquareFootage(sqft) {
-    wizard.squareFootage = sqft
-    addUserMessage(sqft + ' sq ft')
-    clearActions()
-    setTimeout(() => {
-      proceedToEstimate()
-    }, 300)
+  function renderRoomsCountStep() {
+    setActions(`
+      <div id="rooms-options" class="grid grid-cols-4 gap-2">
+        ${['1', '2', '3', '4+'].map((n) => `<button data-rooms="${n}" class="rooms-btn border border-walnut-200 hover:border-walnut-500 hover:bg-walnut-50 text-walnut-800 rounded-lg py-2 text-sm font-medium transition">${n}</button>`).join('')}
+      </div>
+    `)
+    document.querySelectorAll('.rooms-btn').forEach((btn) => {
+      btn.addEventListener('click', () => selectRoomsCount(btn.getAttribute('data-rooms')))
+    })
   }
 
+  function selectRoomsCount(roomsLabel) {
+    wizard._roomsCount = roomsLabel === '4+' ? 4 : Number(roomsLabel)
+    addUserMessage(roomsLabel + (roomsLabel === '1' ? ' room' : ' rooms'))
+    clearActions()
+    ackThenAsk(
+      "Got it.",
+      'And about how large would you say those rooms are on average?',
+      renderRoomSizeStep
+    )
+  }
+
+  function renderRoomSizeStep() {
+    setActions(`
+      <div id="room-size-options">
+        ${wireBtn('size-small', actionButton('Small (e.g. bedroom)', 'fa-compress'))}
+        ${wireBtn('size-medium', actionButton('Medium (e.g. living room)', 'fa-square'))}
+        ${wireBtn('size-large', actionButton('Large (e.g. open floor plan)', 'fa-expand'))}
+      </div>
+    `)
+    bindClick('size-small', () => selectRoomSize('Small'))
+    bindClick('size-medium', () => selectRoomSize('Medium'))
+    bindClick('size-large', () => selectRoomSize('Large'))
+  }
+
+  function selectRoomSize(size) {
+    addUserMessage(size)
+    clearActions()
+    const estimatedSqft = wizard._roomsCount * ROOM_SIZE_SQFT[size]
+    respondAfterThinking(() => {
+      addAssistantMessage(`Based on that, I'll use approximately ${estimatedSqft} sq ft for your estimate.`)
+      setTimeout(() => {
+        afterSquareFootage(estimatedSqft)
+      }, 500)
+    })
+  }
+
+  // Common continuation after square footage is known (typed or estimated)
+  function afterSquareFootage(sqft) {
+    wizard.squareFootage = sqft
+    ackThenAsk(
+      "Perfect, that's exactly what I needed.",
+      'How soon would you like to start?',
+      renderTimelineStep
+    )
+  }
+
+  // --- Q3: Timeline ---
+
+  function renderTimelineStep() {
+    setActions(`
+      <div id="timeline-options">
+        ${wireBtn('tl-asap', actionButton('ASAP', 'fa-bolt'))}
+        ${wireBtn('tl-1wk', actionButton('Within 1 Week', 'fa-calendar-day'))}
+        ${wireBtn('tl-2wk', actionButton('Within 2 Weeks', 'fa-calendar-week'))}
+        ${wireBtn('tl-30d', actionButton('Within 30 Days', 'fa-calendar'))}
+      </div>
+    `)
+    bindClick('tl-asap', () => selectTimeline('ASAP'))
+    bindClick('tl-1wk', () => selectTimeline('Within 1 Week'))
+    bindClick('tl-2wk', () => selectTimeline('Within 2 Weeks'))
+    bindClick('tl-30d', () => selectTimeline('Within 30 Days'))
+  }
+
+  function selectTimeline(value) {
+    wizard.timeline = value
+    addUserMessage(value)
+    clearActions()
+    ackThenAsk(
+      value === 'ASAP' ? "Understood — we'll treat this as a priority." : "Good to know, thank you.",
+      'Which city is the project located in?',
+      renderCityStep
+    )
+  }
+
+  // --- Q4: City ---
+
+  function renderCityStep() {
+    setActions(`
+      <form id="city-form" class="space-y-2">
+        <select id="city-input" required class="w-full border border-walnut-200 rounded-lg px-3 py-2.5 text-sm">
+          <option value="">Select your city</option>
+          <option>New Rochelle</option>
+          <option>Larchmont</option>
+          <option>Pelham</option>
+          <option>Mamaroneck</option>
+          <option>Rye</option>
+          <option>Scarsdale</option>
+          <option>Other</option>
+        </select>
+        <button type="submit" class="w-full bg-walnut-500 hover:bg-walnut-600 text-white font-semibold py-2.5 rounded-lg text-sm">Continue</button>
+      </form>
+    `)
+    const form = document.getElementById('city-form')
+    form.addEventListener('submit', (e) => {
+      e.preventDefault()
+      const val = document.getElementById('city-input').value
+      if (!val) return
+      selectCity(val)
+    })
+  }
+
+  function selectCity(value) {
+    wizard.city = value
+    addUserMessage(value)
+    clearActions()
+    respondAfterThinking(() => {
+      addAssistantMessage('Great.')
+      setTimeout(() => {
+        addAssistantMessage("Based on everything you shared, I've prepared your estimated investment.")
+        proceedToEstimate()
+      }, 500)
+    })
+  }
+
+  // --- Estimate (or, for repairs, the no-online-price message) ---
+
   async function proceedToEstimate() {
-    addAssistantMessage("Great, let me calculate your estimate...")
+    if (wizard.isRepair) {
+      setTimeout(() => {
+        const container = document.getElementById('chat-messages')
+        const card = el(`
+          <div class="flex justify-start">
+            <div class="bg-white border border-walnut-200 rounded-xl p-4 max-w-[92%] w-full text-sm shadow-sm">
+              <p class="text-xs uppercase tracking-wide text-walnut-500 font-bold mb-1"><i class="fas fa-tools mr-1"></i>Repair Evaluation Needed</p>
+              <p class="text-walnut-800">Repairs are unique — I'd rather have Luis take a look in person so you get an accurate number, not a guess. There's no obligation, and the visit is free.</p>
+            </div>
+          </div>
+        `)
+        container.appendChild(card)
+        scrollToBottom()
+
+        setTimeout(() => {
+          addAssistantMessage('What would you like to do next?')
+          renderPostEstimateStep()
+        }, 500)
+      }, 300)
+      return
+    }
 
     try {
       const res = await axios.post('/api/estimate/calculate', {
@@ -275,7 +503,6 @@
             <p class="text-xs uppercase tracking-wide text-forest-600 font-bold mb-1">Your Estimated Investment</p>
             <p class="text-2xl font-serif font-bold text-walnut-900">${total}${laborNote}</p>
             <p class="text-xs text-walnut-500 mt-1">${escapeHtml(estimate.service.label)} · ${estimate.squareFootage} sq ft · $${estimate.pricePerSqFt}/sq ft</p>
-            <p class="text-xs text-walnut-400 mt-3">${escapeHtml(estimate.disclaimer)}</p>
           </div>
         </div>
       `)
@@ -283,26 +510,46 @@
       scrollToBottom()
 
       setTimeout(() => {
-        addAssistantMessage('Would you like to speak with a flooring specialist?')
-        renderPostEstimateStep()
-      }, 400)
+        addAssistantMessage("This estimate is based on the information you provided. If the measurements and floor condition match during our visit, this is the price we'll honor.")
+        setTimeout(() => {
+          addAssistantMessage('What would you like to do next?')
+          renderPostEstimateStep()
+        }, 500)
+      }, 500)
     }, 300)
   }
+
+  // --- Post-estimate: schedule / call / keep chatting ---
 
   function renderPostEstimateStep() {
     setActions(`
       <div id="post-estimate-options">
         ${wireBtn('schedule-visit-btn', actionButton('Schedule My Visit', 'fa-calendar-check'))}
         ${wireBtn('call-me-btn', actionButton('Call Me Now', 'fa-phone'))}
+        ${wireBtn('ask-more-btn', actionButton('Ask Michael Another Question', 'fa-comment-dots'))}
       </div>
     `)
     bindClick('schedule-visit-btn', () => { clearActions(); addUserMessage('Schedule My Visit'); showBookingForm(false) })
     bindClick('call-me-btn', () => { clearActions(); addUserMessage('Call Me Now'); showBookingForm(true) })
+    bindClick('ask-more-btn', () => {
+      clearActions()
+      addUserMessage('Ask Michael Another Question')
+      respondAfterThinking(() => {
+        addAssistantMessage("Of course — go ahead and type your question below, and I'll do my best to help.")
+        const input = document.getElementById('chat-text-input')
+        if (input) input.focus()
+      })
+    })
   }
 
   function showBookingForm(wantsCallNow) {
     setTimeout(() => {
       addAssistantMessage(wantsCallNow ? "Great — leave your info below and a specialist will call you shortly." : "Great — let's get your visit scheduled.")
+
+      const cityOptions = ['New Rochelle', 'Larchmont', 'Pelham', 'Mamaroneck', 'Rye', 'Scarsdale', 'Other']
+      const cityOptionsHtml = cityOptions
+        .map((c) => `<option ${wizard.city === c ? 'selected' : ''}>${c}</option>`)
+        .join('')
 
       const container = document.getElementById('chat-messages')
       const formCard = el(`
@@ -315,13 +562,7 @@
               <input name="address" placeholder="Street address" class="w-full border border-walnut-200 rounded-lg px-3 py-2 text-sm">
               <select name="city" class="w-full border border-walnut-200 rounded-lg px-3 py-2 text-sm">
                 <option value="">Select your city</option>
-                <option>New Rochelle</option>
-                <option>Larchmont</option>
-                <option>Mamaroneck</option>
-                <option>Rye</option>
-                <option>Scarsdale</option>
-                <option>Pelham</option>
-                <option>Other</option>
+                ${cityOptionsHtml}
               </select>
               ${wantsCallNow ? '' : `
               <select name="appointmentDayPref" class="w-full border border-walnut-200 rounded-lg px-3 py-2 text-sm">
@@ -357,8 +598,9 @@
     const accessKey = window.WEB3FORMS_ACCESS_KEY
     if (!accessKey) return
 
-    const estimateText =
-      payload.estimateTotal != null
+    const estimateText = wizard.isRepair
+      ? 'Repair — requires in-person evaluation (no online price)'
+      : payload.estimateTotal != null
         ? `$${payload.estimateTotal}${payload.laborOnly ? ' (labor only, materials not included)' : ''}`
         : 'Requires in-person evaluation'
 
@@ -373,6 +615,7 @@ City: ${payload.city || 'N/A'}
 
 Service Selected: ${payload.service || 'N/A'}
 Square Footage: ${payload.squareFootage ?? 'N/A'}
+Desired Start: ${payload.timeline || 'N/A'}
 Estimated Investment: ${estimateText}
 
 Preferred Appointment Day(s): ${payload.appointmentDayPref || 'N/A'}
@@ -403,14 +646,14 @@ ${payload.conversationSummary || 'N/A'}
     errorEl.classList.add('hidden')
 
     const formData = new FormData(form)
-    const serviceLabel = wizard.estimate ? wizard.estimate.service.label : wizard.service
+    const serviceLabel = wizard.estimate ? wizard.estimate.service.label : wizard.serviceLabel
 
     const payload = {
       name: formData.get('name'),
       phone: formData.get('phone'),
       email: formData.get('email'),
       address: formData.get('address'),
-      city: formData.get('city'),
+      city: formData.get('city') || wizard.city,
       appointmentDayPref: wantsCallNow ? '' : formData.get('appointmentDayPref'),
       appointmentWindow: wantsCallNow ? '' : formData.get('appointmentWindow'),
       consentContact: formData.get('consentContact') === 'on',
@@ -418,6 +661,7 @@ ${payload.conversationSummary || 'N/A'}
       service: serviceLabel,
       squareFootage: wizard.squareFootage,
       finishCoats: wizard.finishCoats,
+      timeline: wizard.timeline,
       estimateTotal: wizard.estimate ? wizard.estimate.total : null,
       laborOnly: wizard.estimate ? wizard.estimate.laborOnly : false,
       wantsCallNow: wantsCallNow
@@ -466,16 +710,23 @@ ${payload.conversationSummary || 'N/A'}
     addUserMessage(text)
     addTypingIndicator()
 
+    const startedAt = Date.now()
     try {
       const res = await axios.post('/api/chat/message', {
         messages: wizard.transcript.map((m) => ({ role: m.role, content: m.content }))
       })
-      removeTypingIndicator()
       const data = res.data
-      addAssistantMessage(data.reply || "Could you tell me a bit more?")
+      const elapsed = Date.now() - startedAt
+      setTimeout(() => {
+        removeTypingIndicator()
+        addAssistantMessage(data.reply || "Could you tell me a bit more?")
+      }, Math.max(0, THINKING_DELAY_MS - elapsed))
     } catch (err) {
-      removeTypingIndicator()
-      addAssistantMessage("Sorry, something went wrong. Please try again, or call us at (914) 316-2170.")
+      const elapsed = Date.now() - startedAt
+      setTimeout(() => {
+        removeTypingIndicator()
+        addAssistantMessage("Sorry, something went wrong. Please try again, or call us at (914) 316-2170.")
+      }, Math.max(0, THINKING_DELAY_MS - elapsed))
     }
   }
 
