@@ -9,7 +9,7 @@
 // - Custom Stain + 2 coats finish                        = $3.50/sq ft
 // - Custom Stain + 3 coats finish                         = $4.00/sq ft
 // - Red Oak Installation 2 1/4" (labor only)               = $3.75/sq ft
-// - Prefinished Hardwood Installation (labor only)         = $2.75/sq ft
+// - Prefinished Hardwood Installation (labor only)         = $3.50/sq ft (updated 2026-07-21, was $2.75)
 // - Pergo / Laminate Installation (labor only)             = $3.00/sq ft
 // - MINIMUM PROJECT SIZE (confirmed by client, added 2026-07-21): any
 //   project under 500 sq ft is billed as if it were 500 sq ft. Small jobs
@@ -99,7 +99,7 @@ function basePricePerSqFt(service: ServiceKey, finishCoats?: FinishCoats): numbe
     case 'hardwood_install':
       return 3.75
     case 'prefinished_install':
-      return 2.75
+      return 3.5
     case 'laminate_install':
       return 3.0
     default:

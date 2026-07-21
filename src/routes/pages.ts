@@ -195,7 +195,7 @@ pages.get('/', (c) => {
         ${serviceCard('fa-broom', 'Sanding & Refinishing — Natural Look', 'Restore worn hardwood to its natural beauty with complete sanding and a durable 3-coat finish.', '$3.50/sq ft')}
         ${serviceCard('fa-palette', 'Sanding & Refinishing — Custom Stain', 'Sanding plus a custom stain color of your choice, with 2 or 3 finish coats.', 'From $3.50/sq ft')}
         ${serviceCard('fa-hammer', 'Red Oak Installation 2 1/4"', 'Professional installation of new Red Oak hardwood flooring. Labor only.', '$3.75/sq ft')}
-        ${serviceCard('fa-layer-group', 'Prefinished Hardwood Installation', 'Professional installation of prefinished hardwood. Labor only.', '$2.75/sq ft')}
+        ${serviceCard('fa-layer-group', 'Prefinished Hardwood Installation', 'Professional installation of prefinished hardwood. Labor only.', '$3.50/sq ft')}
         ${serviceCard('fa-th-large', 'Pergo / Laminate Installation', 'Expert installation of Pergo or laminate flooring. Labor only.', '$3.00/sq ft')}
       </div>
     </div>
