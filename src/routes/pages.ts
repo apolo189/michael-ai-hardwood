@@ -12,11 +12,16 @@ pages.get('/', (c) => {
   <!-- HERO -->
   <section class="relative overflow-hidden bg-gradient-to-b from-walnut-50 to-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
+      <div class="grid lg:grid-cols-[1fr_1.3fr] gap-12 items-center">
         <div>
-          <p class="inline-flex items-center gap-2 text-forest-600 bg-forest-50 text-xs font-semibold px-3 py-1 rounded-full mb-4">
-            <i class="fas fa-map-marker-alt"></i> Serving New Rochelle, Larchmont, Rye, Scarsdale &amp; Pelham
-          </p>
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            <p class="inline-flex items-center gap-2 text-forest-600 bg-forest-50 text-xs font-semibold px-3 py-1 rounded-full">
+              <i class="fas fa-map-marker-alt"></i> Serving New Rochelle, Larchmont, Rye, Scarsdale &amp; Pelham
+            </p>
+            <p class="inline-flex items-center gap-2 text-gold-600 bg-gold-500/10 text-xs font-semibold px-3 py-1 rounded-full">
+              <i class="fas fa-award"></i> 30+ Years Hardwood Experience
+            </p>
+          </div>
           <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-walnut-900 leading-tight">
             Your Floors Aren't Old.<br>They're Forgotten.
           </h1>
@@ -36,28 +41,19 @@ pages.get('/', (c) => {
         </div>
         <div class="relative">
           <div class="bg-white rounded-2xl shadow-2xl border border-walnut-100 p-3">
-            <div class="grid grid-cols-2 gap-2">
+            <div class="grid grid-cols-2 gap-3">
               <div class="relative">
-                <img src="/static/images/floor-before.jpg" alt="Illustrative example of an old, worn hardwood floor before restoration" class="rounded-xl w-full object-cover aspect-[4/3]">
+                <img src="/static/images/floor-before.jpg" alt="Illustrative example of an old, worn hardwood floor before restoration" class="rounded-xl w-full object-cover aspect-[3/4] sm:aspect-square lg:aspect-[4/5]">
                 <span class="absolute top-2 left-2 bg-walnut-900/80 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full">Before</span>
               </div>
               <div class="relative">
-                <img src="/static/images/floor-after.jpg" alt="Illustrative example of a beautifully restored hardwood floor after refinishing" class="rounded-xl w-full object-cover aspect-[4/3]">
+                <img src="/static/images/floor-after.jpg" alt="Illustrative example of a beautifully restored hardwood floor after refinishing" class="rounded-xl w-full object-cover aspect-[3/4] sm:aspect-square lg:aspect-[4/5]">
                 <span class="absolute top-2 left-2 bg-forest-600/90 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-full">After</span>
               </div>
             </div>
             <p class="text-center text-walnut-800 font-serif font-semibold mt-3 text-sm">Your hardwood floors may not need replacement.<br>They may just need the right restoration.</p>
           </div>
           <p class="text-[11px] text-walnut-400 text-center mt-2">*Representative example — actual results vary by project.</p>
-          <div class="absolute -top-5 -right-5 bg-white rounded-xl shadow-xl p-3 flex items-center gap-3 border border-walnut-100 hidden sm:flex">
-            <div class="bg-gold-500/15 text-gold-500 rounded-full w-11 h-11 flex items-center justify-center">
-              <i class="fas fa-award"></i>
-            </div>
-            <div>
-              <p class="font-bold text-walnut-900 leading-none text-sm">30+ Years</p>
-              <p class="text-xs text-walnut-500">Hardwood Experience</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
