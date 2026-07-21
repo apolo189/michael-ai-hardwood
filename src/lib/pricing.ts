@@ -11,9 +11,18 @@
 // - Red Oak Installation 2 1/4" (labor only)               = $3.75/sq ft
 // - Prefinished Hardwood Installation (labor only)         = $2.75/sq ft
 // - Pergo / Laminate Installation (labor only)             = $3.00/sq ft
+// - MINIMUM PROJECT SIZE (confirmed by client, added 2026-07-21): any
+//   project under 500 sq ft is billed as if it were 500 sq ft. Small jobs
+//   cost nearly as much in travel/prep/materials as a 500 sq ft job, so a
+//   minimum protects margin on small projects. The estimate result always
+//   reports both the customer's actual square footage and the billed
+//   (minimum-applied) square footage, with a clear note, so it's obvious
+//   this is a minimum-project-size policy and not a pricing error.
 // NOTE: "Repairs" service removed from the guided flow — always requires
 // in-person evaluation, handled as a free-text fallback in the assistant.
 // ============================================================
+
+export const MINIMUM_PROJECT_SQFT = 500
 
 export type ServiceKey =
   | 'sanding_refinishing_natural'
@@ -106,7 +115,9 @@ export interface EstimateInput {
 
 export interface EstimateResult {
   service: ServiceDefinition
-  squareFootage: number
+  squareFootage: number // actual square footage the customer provided
+  billedSquareFootage: number // square footage actually billed (minimum-adjusted)
+  minimumApplied: boolean
   pricePerSqFt: number
   total: number
   laborOnly: boolean
@@ -121,12 +132,16 @@ export function calculateEstimate(input: EstimateInput): EstimateResult {
   }
 
   const sqft = Math.max(0, Number(input.squareFootage) || 0)
+  const minimumApplied = sqft > 0 && sqft < MINIMUM_PROJECT_SQFT
+  const billedSqft = minimumApplied ? MINIMUM_PROJECT_SQFT : sqft
   const pricePerSqFt = basePricePerSqFt(input.service, input.finishCoats)
-  const total = Math.round(sqft * pricePerSqFt)
+  const total = Math.round(billedSqft * pricePerSqFt)
 
   return {
     service,
     squareFootage: sqft,
+    billedSquareFootage: billedSqft,
+    minimumApplied,
     pricePerSqFt,
     total,
     laborOnly: service.laborOnly,

@@ -29,6 +29,7 @@
   }
 
   const ROOM_SIZE_SQFT = { Small: 120, Medium: 200, Large: 300 }
+  const MINIMUM_PROJECT_SQFT = 500 // must match src/lib/pricing.ts MINIMUM_PROJECT_SQFT
 
   function getSessionId() {
     let id = sessionStorage.getItem(SESSION_KEY)
@@ -520,6 +521,10 @@
   function renderEstimateResult(estimate) {
     const laborNote = estimate.laborOnly ? ' (labor only — materials not included)' : ''
     const total = '$' + Number(estimate.total).toLocaleString('en-US')
+    const billedSqft = estimate.billedSquareFootage != null ? estimate.billedSquareFootage : estimate.squareFootage
+    const minimumNote = estimate.minimumApplied
+      ? `<p class="text-xs text-walnut-400 mt-1"><i class="fas fa-info-circle mr-1"></i>Your project (${estimate.squareFootage} sq ft) is billed at our ${MINIMUM_PROJECT_SQFT}-sq-ft minimum, which covers setup, materials, and travel for smaller jobs.</p>`
+      : ''
 
     setTimeout(() => {
       const container = document.getElementById('chat-messages')
@@ -528,7 +533,8 @@
           <div class="bg-white border border-forest-200 rounded-xl p-4 max-w-[92%] w-full text-sm shadow-sm">
             <p class="text-xs uppercase tracking-wide text-forest-600 font-bold mb-1">Your Estimated Investment</p>
             <p class="text-2xl font-serif font-bold text-walnut-900">${total}${laborNote}</p>
-            <p class="text-xs text-walnut-500 mt-1">${escapeHtml(estimate.service.label)} · ${estimate.squareFootage} sq ft · $${estimate.pricePerSqFt}/sq ft</p>
+            <p class="text-xs text-walnut-500 mt-1">${escapeHtml(estimate.service.label)} · ${billedSqft} sq ft · $${estimate.pricePerSqFt}/sq ft</p>
+            ${minimumNote}
           </div>
         </div>
       `)
@@ -630,6 +636,10 @@
         ? `$${payload.estimateTotal}${payload.laborOnly ? ' (labor only, materials not included)' : ''}`
         : 'Requires in-person evaluation'
 
+    const minimumNote = wizard.estimate && wizard.estimate.minimumApplied
+      ? ` (billed at ${MINIMUM_PROJECT_SQFT} sq ft minimum)`
+      : ''
+
     const message = `
 NEW HARDWOOD FLOORING LEAD
 
@@ -640,7 +650,7 @@ Address: ${payload.address || 'N/A'}
 City: ${payload.city || 'N/A'}
 
 Service Selected: ${payload.service || 'N/A'}
-Square Footage: ${payload.squareFootage ?? 'N/A'}
+Square Footage: ${payload.squareFootage ?? 'N/A'}${minimumNote}
 Desired Start: ${payload.timeline || 'N/A'}
 Estimated Investment: ${estimateText}
 
