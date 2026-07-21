@@ -1,8 +1,8 @@
 // Shared HTML shell used by all pages (compliance-friendly: consistent header/footer with
 // business identity, Privacy Policy & Terms links on every page, per Google Ads policy).
 
-export function pageShell(opts: { title: string; description: string; bodyContent: string; activeNav?: string }) {
-  const { title, description, bodyContent } = opts
+export function pageShell(opts: { title: string; description: string; bodyContent: string; activeNav?: string; web3formsKey?: string }) {
+  const { title, description, bodyContent, web3formsKey } = opts
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -104,6 +104,13 @@ export function pageShell(opts: { title: string; description: string; bodyConten
   <!-- Michael AI Chat Widget -->
   <div id="chat-widget-root"></div>
 
+  <script>
+    // Web3Forms Access Key is designed to be public (client-side use is the
+    // documented/free-plan way to call their API). We save the lead to our
+    // own D1 database server-side regardless; this key only powers the
+    // email notification sent directly from the visitor's browser.
+    window.WEB3FORMS_ACCESS_KEY = ${JSON.stringify(web3formsKey || '')};
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
   <script src="/static/chat-widget.js"></script>
   <script src="/static/app.js"></script>

@@ -1,7 +1,11 @@
 import { Hono } from 'hono'
 import { pageShell } from '../lib/layout'
 
-const pages = new Hono()
+type Bindings = {
+  WEB3FORMS_ACCESS_KEY: string
+}
+
+const pages = new Hono<{ Bindings: Bindings }>()
 
 pages.get('/', (c) => {
   const body = `
@@ -271,7 +275,8 @@ pages.get('/', (c) => {
       title: 'Westchester Hardwood Experts | Premium Hardwood Flooring Sanding, Refinishing & Installation',
       description:
         'Expert hardwood flooring sanding, refinishing, and installation for New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale, and Pelham, NY. Get a free AI-powered estimate with Michael AI.',
-      bodyContent: body
+      bodyContent: body,
+      web3formsKey: c.env.WEB3FORMS_ACCESS_KEY
     })
   )
 })
@@ -318,7 +323,7 @@ pages.get('/privacy-policy', (c) => {
     </div>
   </section>
   `
-  return c.html(pageShell({ title: 'Privacy Policy | Westchester Hardwood Experts', description: 'Our privacy policy.', bodyContent: body }))
+  return c.html(pageShell({ title: 'Privacy Policy | Westchester Hardwood Experts', description: 'Our privacy policy.', bodyContent: body, web3formsKey: c.env.WEB3FORMS_ACCESS_KEY }))
 })
 
 pages.get('/terms-of-service', (c) => {
@@ -358,7 +363,7 @@ pages.get('/terms-of-service', (c) => {
     </div>
   </section>
   `
-  return c.html(pageShell({ title: 'Terms of Service | Westchester Hardwood Experts', description: 'Our terms of service.', bodyContent: body }))
+  return c.html(pageShell({ title: 'Terms of Service | Westchester Hardwood Experts', description: 'Our terms of service.', bodyContent: body, web3formsKey: c.env.WEB3FORMS_ACCESS_KEY }))
 })
 
 pages.get('/accessibility', (c) => {
@@ -373,7 +378,7 @@ pages.get('/accessibility', (c) => {
     </div>
   </section>
   `
-  return c.html(pageShell({ title: 'Accessibility Statement | Westchester Hardwood Experts', description: 'Our accessibility statement.', bodyContent: body }))
+  return c.html(pageShell({ title: 'Accessibility Statement | Westchester Hardwood Experts', description: 'Our accessibility statement.', bodyContent: body, web3formsKey: c.env.WEB3FORMS_ACCESS_KEY }))
 })
 
 pages.get('/about', (c) => {
@@ -389,7 +394,7 @@ pages.get('/about', (c) => {
     </div>
   </section>
   `
-  return c.html(pageShell({ title: 'About Us | Westchester Hardwood Experts', description: 'Learn about our 30+ years of hardwood flooring experience.', bodyContent: body }))
+  return c.html(pageShell({ title: 'About Us | Westchester Hardwood Experts', description: 'Learn about our 30+ years of hardwood flooring experience.', bodyContent: body, web3formsKey: c.env.WEB3FORMS_ACCESS_KEY }))
 })
 
 pages.get('/contact', (c) => {
@@ -409,7 +414,7 @@ pages.get('/contact', (c) => {
     </div>
   </section>
   `
-  return c.html(pageShell({ title: 'Contact Us | Westchester Hardwood Experts', description: 'Contact Westchester Hardwood Experts.', bodyContent: body }))
+  return c.html(pageShell({ title: 'Contact Us | Westchester Hardwood Experts', description: 'Contact Westchester Hardwood Experts.', bodyContent: body, web3formsKey: c.env.WEB3FORMS_ACCESS_KEY }))
 })
 
 function serviceCard(icon: string, title: string, desc: string, price: string) {

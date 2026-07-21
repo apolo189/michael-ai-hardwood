@@ -1,9 +1,14 @@
 import { Hono } from 'hono'
-import { sendLeadNotification } from '../lib/webhook'
+
+// NOTE: Web3Forms' free plan only supports client-side (browser) calls —
+// their server-side/API usage requires a paid plan + IP whitelisting.
+// The email notification is sent directly from the browser (see
+// sendWeb3FormsNotification in chat-widget.js) right after this endpoint
+// confirms the lead was saved. This route is the source of truth: it
+// always persists the lead to D1 regardless of whether the email succeeds.
 
 type Bindings = {
   DB: D1Database
-  WEB3FORMS_ACCESS_KEY: string
 }
 
 const lead = new Hono<{ Bindings: Bindings }>()
@@ -72,27 +77,7 @@ lead.post('/submit', async (c) => {
     console.error('DB insert error:', err)
   }
 
-  const notifyResult = await sendLeadNotification(env.WEB3FORMS_ACCESS_KEY, {
-    name,
-    phone,
-    email,
-    address,
-    city,
-    service,
-    squareFootage,
-    finishOption,
-    finishCoats,
-    estimateTotal,
-    laborOnly,
-    appointmentDayPref,
-    appointmentWindow,
-    photoUrls,
-    conversationSummary,
-    consentContact,
-    wantsCallNow
-  })
-
-  return c.json({ success: true, notified: notifyResult.ok, notifyError: notifyResult.error })
+  return c.json({ success: true })
 })
 
 export default lead

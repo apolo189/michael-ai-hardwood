@@ -403,6 +403,51 @@
     }, 300)
   }
 
+  async function sendWeb3FormsNotification(payload) {
+    const accessKey = window.WEB3FORMS_ACCESS_KEY
+    if (!accessKey) return
+
+    const estimateText =
+      payload.estimateTotal != null
+        ? `$${payload.estimateTotal}${payload.laborOnly ? ' (labor only, materials not included)' : ''}`
+        : 'Requires in-person evaluation'
+
+    const message = `
+NEW HARDWOOD FLOORING LEAD
+
+Customer Name: ${payload.name || 'N/A'}
+Phone: ${payload.phone || 'N/A'}
+Email: ${payload.email || 'N/A'}
+Address: ${payload.address || 'N/A'}
+City: ${payload.city || 'N/A'}
+
+Service Selected: ${payload.service || 'N/A'}
+Square Footage: ${payload.squareFootage ?? 'N/A'}
+Estimated Investment: ${estimateText}
+
+Preferred Appointment Day(s): ${payload.appointmentDayPref || 'N/A'}
+Preferred Time Window: ${payload.appointmentWindow || 'N/A'}
+Wants a call now: ${payload.wantsCallNow ? 'YES - call ASAP' : 'No, scheduled visit preferred'}
+
+Photos: ${payload.photoUrls && payload.photoUrls.length ? payload.photoUrls.join(', ') : 'None uploaded'}
+
+Contact Consent (TCPA): ${payload.consentContact ? 'YES - customer agreed to be contacted by phone/text' : 'NOT CONFIRMED'}
+
+--- Conversation Summary ---
+${payload.conversationSummary || 'N/A'}
+`.trim()
+
+    return axios.post('https://api.web3forms.com/submit', {
+      access_key: accessKey,
+      subject: '🔥 NEW HARDWOOD LEAD',
+      from_name: 'Michael AI - Hardwood Flooring Assistant',
+      name: payload.name || 'Website Lead',
+      email: payload.email || 'noreply@michaelai-hardwood.com',
+      phone: payload.phone || '',
+      message
+    })
+  }
+
   async function onBookingSubmit(e, wantsCallNow) {
     e.preventDefault()
     const form = e.target
@@ -436,8 +481,16 @@
     submitBtn.textContent = 'Sending...'
 
     try {
+      // 1. Always save the lead to our own database first (source of truth).
       const res = await axios.post('/api/lead/submit', payload)
       if (res.data && res.data.success) {
+        // 2. Send the email notification directly from the browser via Web3Forms.
+        //    Web3Forms' free plan requires client-side calls (their server-side
+        //    API needs a paid plan + IP whitelisting), so we fire this from here
+        //    instead of relying on the backend. Best-effort: if it fails, the
+        //    lead is still safely stored in our database above.
+        sendWeb3FormsNotification(payload).catch((e) => console.warn('Web3Forms notify failed:', e))
+
         const confirmMsg = wantsCallNow
           ? `✅ Thank you, ${escapeHtml(payload.name)}! A flooring specialist will call you shortly at ${escapeHtml(payload.phone)}.`
           : `✅ Thank you, ${escapeHtml(payload.name)}! Your request has been received. Our team will reach out to confirm your ${escapeHtml(payload.appointmentWindow || '')} appointment.`
