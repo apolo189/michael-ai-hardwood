@@ -1,10 +1,24 @@
-# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.3 — Live on Cloudflare)
+# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.4 — Live on Cloudflare)
 
 ## Project Overview
 - **Name**: Westchester Hardwood Experts — powered by Michael AI
 - **Goal**: Generate qualified hardwood flooring leads from Google Ads via a button-driven guided estimate wizard ("Michael AI") that educates homeowners, calculates a transparent, exact estimate, and hands off "hot" qualified leads to a human closer.
 - **Target Areas**: New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale, Pelham (Westchester County, NY)
 - **Business strategy**: **70% automation / 30% human** — Michael AI captures, educates, calculates, and qualifies. The human specialist (Luis) closes by phone or in-person visit. *"Michael AI abre la puerta. Luis cierra el trabajo."*
+
+## What's New in v2.4 (Consultant Conversation Flow + Critical Bug Fix + Hero Polish)
+- **Chat flow completely redesigned to feel consultative, not transactional.** Previous flow (service → sqft → instant price, ~10 seconds) felt like a calculator. New flow (`chat-widget.js`, "Consultant Flow v3"):
+  1. Greeting + framing message ("Before I calculate your investment, I'd like to understand your project...")
+  2. **Q1 — Project type**: Sanding Natural / Sanding Custom Stain / New Hardwood Installation (→ sub-step: Red Oak / Prefinished / Pergo-Laminate) / **Repair Hardwood Floors** (new — never priced online, routes straight to a "free in-person evaluation" card)
+  3. **Q2 — Square footage**: numeric input, OR **"I don't know my square footage"** → fallback asks room count (1/2/3/4+) then room size (Small/Medium/Large) and silently computes an internal estimate (120/200/300 sq ft per room) — no ranges are ever shown to the visitor
+  4. **Q3 — Timeline** (new): ASAP / Within 1 Week / Within 2 Weeks / Within 30 Days
+  5. **Q4 — City** (new): dropdown, pre-fills the booking form's city field later
+  6. Brief pause → **estimate card** (unchanged pricing engine/calculation, exact same `/api/estimate/calculate`) → disclaimer → "What would you like to do next?" → Schedule My Visit / Call Me Now / **Ask Michael Another Question** (new 3rd option, re-opens free-text input)
+  - **Every assistant reply now waits a minimum of 5 seconds** (`THINKING_DELAY_MS = 5000`), shown with a visible typing indicator, before appearing — plus a short natural acknowledgment before each next question. Total conversation now takes ~45-60 seconds instead of ~10, so Michael feels like an experienced consultant qualifying the project rather than an instant-answer form. This pacing applies to both the guided wizard and the free-text fallback (`/api/chat/message`).
+  - `timeline` is included in the Web3Forms email notification but intentionally **not** persisted to D1 (no new column/migration) to keep the change scoped to the conversation layer only.
+  - **Pricing engine, calculation logic, branding, colors, avatar, email notifications, and booking/schedule/call buttons were left completely untouched**, per explicit requirement.
+- **Critical bug fixed: chat widget was silently broken in production.** While testing the hero change, discovered (via `node --check` + Playwright console capture) that `chat-widget.js` had a JS syntax error from a leftover `sed` cleanup mistake during the earlier photo-upload removal — this had been live in production since that commit, meaning the entire chat widget had been non-functional for site visitors until this was caught and fixed. Verified with `node --check`, rebuilt, and confirmed zero console errors on the live production URL after redeploying.
+- **Hero before/after photos enlarged**, and the **"30+ Years Hardwood Experience" badge moved off the photos** (it previously floated as an overlapping card covering part of the images) into a text pill above the headline. Purely a CSS/layout change — no content or pricing logic touched.
 
 ## What's New in v2.3 (Production Deployment + Photo Upload Removed)
 - **Deployed to Cloudflare Pages** (Luis's own Cloudflare account, BYOK) — project `michael-ai-hardwood`, live at `https://michael-ai-hardwood.pages.dev` (custom domain pending).
@@ -40,7 +54,7 @@ Landing page design review feedback: the site was "clean and professional but mi
 - **New "Old Way vs Our Way" section** — process-focused differentiation. **No named competitors are ever mentioned or compared against**, in the UI or in the AI's fallback responses (legal / Google Ads risk).
 - **New CTA hierarchy**: Primary = 🟤 **"Get My Estimate"**, Secondary = 📞 **"Call Now"**. Phone is never the forced first step — it's always offered as an equal option only **after** the guided estimate completes, via *"Would you like to speak with a flooring specialist?"* → **"Schedule My Visit"** or **"Call Me Now"**.
 
-## Pricing (Deterministic Backend — `src/lib/pricing.ts`)
+## Pricing (Deterministic Backend — `src/lib/pricing.ts` — UNCHANGED since v2, including in v2.4's conversation-flow redesign)
 | Service | Price | Notes |
 |---|---|---|
 | Sanding & Refinishing — Natural Look | **$3.50/sq ft** | Always 3 coats total (1 sealer + 2 finish), fixed, no coat choice |
@@ -49,19 +63,22 @@ Landing page design review feedback: the site was "clean and professional but mi
 | Red Oak Installation 2 1/4" | **$3.75/sq ft** | Labor only, material separate |
 | Prefinished Hardwood Installation | **$2.75/sq ft** | Labor only, material separate |
 | Pergo / Laminate Installation | **$3.00/sq ft** | Labor only, material separate |
-| Repairs | *No online price* | Free-text fallback only → always redirects to a no-obligation in-person evaluation |
+| Repairs | *No online price* | Now a formal Q1 button ("Repair Hardwood Floors") as of v2.4, but still never priced — always routes to a no-obligation in-person evaluation card |
 
 The AI **never** invents a price. All totals are calculated by `calculateEstimate()` in `src/lib/pricing.ts` and returned as an exact whole-dollar total (`Math.round(sqft * pricePerSqFt)`), never a range.
 
 ## Features Completed ✅
 - **Premium landing page** — Hero with before/after transformation imagery + compliance disclaimer + dual CTA (Get My Estimate / Call Now), Trust section, "Old Way vs Our Way" section, Services grid, Service Areas, FAQ, final dual CTA
-- **Michael AI guided wizard** (floating widget, bottom-right), 100% deterministic front-end state machine:
-  1. Greeting → service type (5 buttons: Natural, Custom Stain, Red Oak Install, Prefinished Install, Pergo/Laminate) + "Something else?" free-text link
-  2. Finish coats (2 vs 3 buttons) — only shown for Custom Stain
-  3. Exact square footage (numeric input, no ranges)
-  4. Instant estimate card with exact total, price/sq ft, and transparency disclaimer
-  5. Post-estimate handoff: **"Schedule My Visit"** vs **"Call Me Now"** (equal-weight buttons) → booking form (day/window fields hidden when "Call Me Now" is chosen) → TCPA consent checkbox → submit
-  - Free-text input always available at the bottom for off-script questions (repairs, general questions) → routed to the LLM fallback (`/api/chat/message`), which never invents prices and never compares to named competitors
+- **Michael AI guided wizard** (floating widget, bottom-right), 100% deterministic front-end state machine — "Consultant Flow v3" (see v2.4 section above for full detail):
+  1. Greeting + framing message, paced with a 5-second minimum "thinking" delay before every reply
+  2. Q1 — service type (4 buttons: Natural, Custom Stain, New Installation → sub-step Red Oak/Prefinished/Laminate, **Repair**) + "Something else?" free-text link
+  3. Finish coats (2 vs 3 buttons) — only shown for Custom Stain
+  4. Q2 — square footage (numeric input, or "I don't know" → room count + room size fallback, no ranges shown)
+  5. Q3 — timeline (ASAP / 1 week / 2 weeks / 30 days)
+  6. Q4 — city (dropdown)
+  7. Estimate card with exact total, price/sq ft, and transparency disclaimer (repairs instead get a "free in-person evaluation" card, no price)
+  8. Post-estimate handoff: **"Schedule My Visit"** / **"Call Me Now"** / **"Ask Michael Another Question"** → booking form (day/window fields hidden when "Call Me Now" is chosen, city pre-filled from Q4) → TCPA consent checkbox → submit
+  - Free-text input always available at the bottom for off-script questions (also paced with the same 5-second minimum delay) → routed to the LLM fallback (`/api/chat/message`), which never invents prices and never compares to named competitors
 - **Pricing calculator** (`src/lib/pricing.ts`) — deterministic backend, see table above
 - **Appointment request** — fixed time windows only (8-11AM / 11AM-2PM / 2PM-5PM, Mon-Fri + optional Sat morning); omitted entirely when the lead chooses "Call Me Now" instead of scheduling a visit
 - **Lead capture & notification**:
@@ -93,31 +110,33 @@ The AI **never** invents a price. All totals are calculated by `calculateEstimat
 - **Static images** — `public/static/images/floor-before.jpg` / `floor-after.jpg` (AI-generated, v2.1 regenerated for more emotional contrast, optimized to ~185-190KB JPEGs), `michael-ai-avatar.jpg` (AI-generated illustrated/vector icon, ~21KB, deliberately non-photorealistic)
 
 ## ⚠️ Pending / Not Yet Configured
-1. **Custom domain** — confirmed target: `westchesternyhardwoodfloors.com`. Not yet connected to the Cloudflare Pages project. Site currently lives at the `*.pages.dev` subdomain only (not accepted by Google Ads — a custom domain is required before running ads).
+1. **Custom domain** — confirmed target: `westchesternyhardwoodfloors.com` (purchased via Hostinger). Nameservers have been updated at the registrar to Cloudflare's (`milan.ns.cloudflare.com`, `paige.ns.cloudflare.com`) and are confirmed propagated via independent DNS lookups (Google DNS, Cloudflare DNS). Cloudflare's zone dashboard has not yet flipped to "Active" (its periodic activation check can lag behind actual DNS propagation by minutes to hours) — once it does, the final step is connecting the domain to the `michael-ai-hardwood` Pages project (Cloudflare dashboard → Workers & Pages → michael-ai-hardwood → Custom domains → Add). Site currently lives at the `*.pages.dev` subdomain only (not accepted by Google Ads — a custom domain is required before running ads).
 2. **Real business name and Gmail** — phone number is confirmed real: **(914) 316-2170**, updated everywhere (header, footer, hero, calculator CTA, final CTA, FAQ, legal pages, chat widget error messages). Still placeholder:
    - Business name: "Westchester Hardwood Experts"
    - Email: info@westchesterhardwoodexperts.com
    - **Update these in `src/lib/layout.ts` and `src/routes/pages.ts` once confirmed.**
 
 ## Recommended Next Steps
-1. Buy/finalize the domain `westchesternyhardwoodfloors.com` and point its DNS to Cloudflare, then connect it to the Pages project (`wrangler pages domain add`).
+1. Finish connecting `westchesternyhardwoodfloors.com` once the Cloudflare zone shows "Active" (nameservers already propagated — see Pending section above).
 2. Confirm real business name / email and update site copy.
-3. Second iteration ideas: SMS confirmation, calendar sync for appointment windows, admin dashboard to view leads (with a "wants call now" priority flag for Luis), A/B testing hero copy, Google Ads conversion tracking (gtag) once domain is live.
+3. Second iteration ideas: SMS confirmation, calendar sync for appointment windows, admin dashboard to view leads (with a "wants call now" priority flag for Luis), A/B testing hero copy, Google Ads conversion tracking (gtag) once domain is live, optionally persist `timeline` to D1 if Luis wants it queryable/reportable later.
 
 ## User Guide
 1. Visit the landing page. Click **"Get My Estimate"** (primary CTA) or the chat bubble (bottom-right) to open **Michael AI**.
-2. Pick your project type from the buttons (Natural, Custom Stain, Red Oak Install, Prefinished, Pergo/Laminate).
-3. If Custom Stain, pick 2 or 3 coats.
-4. Enter your exact square footage.
-5. Michael instantly shows your **exact estimated investment** — never a "final price", always with a transparency disclaimer.
-6. Choose **"Schedule My Visit"** or **"Call Me Now"** — fill in your name, phone, and check the consent box, then submit.
-7. Your request is saved and the business is notified by email — including whether you want an immediate call or a scheduled visit.
-8. For anything off-script (e.g. repairs), type it in the free-text box at the bottom — Michael will always offer a free in-person evaluation instead of guessing a price.
+2. Michael introduces himself and briefly explains he wants to understand the project first (a few seconds' pause — this is intentional, so it feels like a real consultant, not a form).
+3. Pick your project type (Natural, Custom Stain, New Installation → Red Oak/Prefinished/Laminate, or Repair).
+4. If Custom Stain, pick 2 or 3 coats.
+5. Enter your exact square footage, or tap **"I don't know"** and answer room count + room size instead — Michael works out an estimate for you.
+6. Answer how soon you'd like to start, and which city the project is in.
+7. After a brief pause, Michael shows your **exact estimated investment** — never a "final price", always with a transparency disclaimer. (If you selected Repair, Michael instead offers a free in-person evaluation — repairs are never priced online.)
+8. Choose **"Schedule My Visit"**, **"Call Me Now"**, or **"Ask Michael Another Question"** — for booking, fill in your name, phone, and check the consent box, then submit.
+9. Your request is saved and the business is notified by email — including your timeline and whether you want an immediate call or a scheduled visit.
+10. For anything off-script, type it in the free-text box at the bottom — Michael will always offer a free in-person evaluation instead of guessing a price for repairs.
 
 ## Deployment
 - **Platform**: Cloudflare Pages (Hono + TypeScript + Tailwind CDN), deployed to Luis's own Cloudflare account (BYOK)
 - **Production URL**: https://michael-ai-hardwood.pages.dev *(custom domain `westchesternyhardwoodfloors.com` pending DNS setup)*
 - **GitHub**: https://github.com/apolo189/michael-ai-hardwood (branch `main`)
-- **Status**: ✅ **Deployed and live in production** — verified end-to-end (landing page, estimate calculator, lead submission all saving to production D1)
-- **Tech Stack**: Hono, Cloudflare D1, OpenAI-compatible LLM (`gpt-5` via Genspark proxy, fallback-only, no tool-calling in v2), Web3Forms for email notifications (client-side call)
-- **Last Updated**: 2026-07-21 (v2.3 — production deploy, photo upload removed)
+- **Status**: ✅ **Deployed and live in production** — verified end-to-end (landing page, estimate calculator, lead submission all saving to production D1, new v3 chat flow live with zero console/JS errors)
+- **Tech Stack**: Hono, Cloudflare D1, OpenAI-compatible LLM (`gpt-5` via Genspark proxy, fallback-only, no tool-calling), Web3Forms for email notifications (client-side call)
+- **Last Updated**: 2026-07-21 (v2.4 — consultant conversation flow redesign, critical chat-widget bug fix, hero photo enlargement)
