@@ -1,10 +1,17 @@
-# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.2 — Conversion Polish)
+# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.3 — Live on Cloudflare)
 
 ## Project Overview
 - **Name**: Westchester Hardwood Experts — powered by Michael AI
 - **Goal**: Generate qualified hardwood flooring leads from Google Ads via a button-driven guided estimate wizard ("Michael AI") that educates homeowners, calculates a transparent, exact estimate, and hands off "hot" qualified leads to a human closer.
 - **Target Areas**: New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale, Pelham (Westchester County, NY)
 - **Business strategy**: **70% automation / 30% human** — Michael AI captures, educates, calculates, and qualifies. The human specialist (Luis) closes by phone or in-person visit. *"Michael AI abre la puerta. Luis cierra el trabajo."*
+
+## What's New in v2.3 (Production Deployment + Photo Upload Removed)
+- **Deployed to Cloudflare Pages** (Luis's own Cloudflare account, BYOK) — project `michael-ai-hardwood`, live at `https://michael-ai-hardwood.pages.dev` (custom domain pending).
+- **Production D1 database created and migrated** — `michael-ai-hardwood-production`, both migrations applied via `--remote`. Leads are now being saved to a real production database.
+- **Photo upload step removed entirely** — Luis visits every lead in person to verify measurements and floor condition, so uploading photos beforehand added no value. This also removes the need for Cloudflare R2 (avoids the extra one-time "Enable R2" account setup). Removed: the wizard's photo-upload step (`chat-widget.js`), the `/api/upload` route (`src/routes/upload.ts`, deleted), the `PHOTOS` R2 binding (`src/index.tsx`, `wrangler.jsonc`). The `photos_json` DB column is harmlessly left in place, always storing `"[]"`.
+- **Web3Forms email notification fixed for the free plan** — Web3Forms' free plan only allows client-side (browser) calls, not server-side/API calls. The lead is still always saved to D1 first (source of truth via `/api/lead/submit`), then the notification email is sent directly from the visitor's browser (`sendWeb3FormsNotification()` in `chat-widget.js`) using an Access Key safely injected into the page (`window.WEB3FORMS_ACCESS_KEY` — Web3Forms' own docs confirm this key is designed to be public/client-side).
+- **Code pushed to GitHub** — `https://github.com/apolo189/michael-ai-hardwood` (branch `main`).
 
 ## What's New in v2.2 (Conversion Polish — "Shark Sees Blood" CTA)
 Follow-up design feedback: the CTA needed to be impossible to ignore, and the site needed to reduce friction by showing "how easy" the process is.
@@ -52,16 +59,14 @@ The AI **never** invents a price. All totals are calculated by `calculateEstimat
   1. Greeting → service type (5 buttons: Natural, Custom Stain, Red Oak Install, Prefinished Install, Pergo/Laminate) + "Something else?" free-text link
   2. Finish coats (2 vs 3 buttons) — only shown for Custom Stain
   3. Exact square footage (numeric input, no ranges)
-  4. Optional photo upload (skip allowed)
-  5. Instant estimate card with exact total, price/sq ft, and transparency disclaimer
-  6. Post-estimate handoff: **"Schedule My Visit"** vs **"Call Me Now"** (equal-weight buttons) → booking form (day/window fields hidden when "Call Me Now" is chosen) → TCPA consent checkbox → submit
+  4. Instant estimate card with exact total, price/sq ft, and transparency disclaimer
+  5. Post-estimate handoff: **"Schedule My Visit"** vs **"Call Me Now"** (equal-weight buttons) → booking form (day/window fields hidden when "Call Me Now" is chosen) → TCPA consent checkbox → submit
   - Free-text input always available at the bottom for off-script questions (repairs, general questions) → routed to the LLM fallback (`/api/chat/message`), which never invents prices and never compares to named competitors
 - **Pricing calculator** (`src/lib/pricing.ts`) — deterministic backend, see table above
-- **Photo upload** — stored in Cloudflare R2, referenced by key in the lead record
 - **Appointment request** — fixed time windows only (8-11AM / 11AM-2PM / 2PM-5PM, Mon-Fri + optional Sat morning); omitted entirely when the lead chooses "Call Me Now" instead of scheduling a visit
 - **Lead capture & notification**:
   - Leads persisted in Cloudflare D1 (`leads` table), including `finish_coats`, `estimate_total`, `wants_call_now` (v2 schema, migration `0002_pricing_v2.sql`)
-  - Notification sent via **Web3Forms** (`WEB3FORMS_ACCESS_KEY`) — includes whether the lead wants an immediate call (for phone-closing) or a scheduled visit
+  - Notification sent via **Web3Forms**, called directly from the browser (client-side, per Web3Forms' free-plan requirement) right after the lead is saved to D1 — includes whether the lead wants an immediate call (for phone-closing) or a scheduled visit
   - Real TCPA-style **consent checkbox** in the booking form (not left to the AI to infer)
 - **Google Ads compliance groundwork**:
   - Dedicated Privacy Policy (`/privacy-policy`), Terms of Service (`/terms-of-service`), Accessibility Statement (`/accessibility`)
@@ -80,45 +85,39 @@ The AI **never** invents a price. All totals are calculated by `calculateEstimat
 | POST | `/api/chat/message` | Free-text fallback only (off-script questions, repairs). Body: `{ messages: [{role,content}] }` → `{ reply }`. No tool-calling, never sets pricing. |
 | GET | `/api/estimate/services` | List of the 5 formal services with metadata |
 | POST | `/api/estimate/calculate` | Body: `{ service, squareFootage, finishCoats? }` → exact deterministic estimate (`{ total, pricePerSqFt, ... }`) |
-| POST | `/api/upload/photo` | multipart/form-data `photo` file → stored in R2, returns `{ key }` |
-| GET | `/api/upload/photo/:key` | Serves an uploaded photo from R2 |
-| POST | `/api/lead/submit` | Structured lead submission (requires `name` + phone/email + `consentContact: true`). Body includes `wantsCallNow`, `estimateTotal`, `finishCoats` → saves to D1 + sends Web3Forms email |
+| POST | `/api/lead/submit` | Structured lead submission (requires `name` + phone/email + `consentContact: true`). Body includes `wantsCallNow`, `estimateTotal`, `finishCoats` → saves to D1. The frontend then sends the Web3Forms email notification directly from the browser. |
 
 ## Data Architecture
-- **D1 Database** (`michael-ai-hardwood-production`) — table `leads` (name, phone, email, address, city, service, square_footage, finish_option, **finish_coats**, **estimate_total**, labor_only, appointment_day_pref, appointment_window, photos_json, conversation_summary, consent_contact, **wants_call_now**, status, created_at) and `chat_sessions` (unused in v2 flow)
-- **R2 Bucket** (`michael-ai-hardwood-photos`) — customer-uploaded floor photos, key format `leads/<timestamp>-<rand>.<ext>`
-- **Web3Forms** — outbound email notification service (no SMTP available on Cloudflare Workers)
+- **D1 Database** (`michael-ai-hardwood-production`, id `c4390bab-6ac2-4895-b04d-477cf75ecd13`) — table `leads` (name, phone, email, address, city, service, square_footage, finish_option, **finish_coats**, **estimate_total**, labor_only, appointment_day_pref, appointment_window, photos_json *(always `[]`, no longer collected)*, conversation_summary, consent_contact, **wants_call_now**, status, created_at) and `chat_sessions` (unused in v2 flow)
+- **Web3Forms** — outbound email notification service (no SMTP available on Cloudflare Workers), called client-side from the browser (free-plan requirement)
 - **Static images** — `public/static/images/floor-before.jpg` / `floor-after.jpg` (AI-generated, v2.1 regenerated for more emotional contrast, optimized to ~185-190KB JPEGs), `michael-ai-avatar.jpg` (AI-generated illustrated/vector icon, ~21KB, deliberately non-photorealistic)
 
 ## ⚠️ Pending / Not Yet Configured
-1. **`WEB3FORMS_ACCESS_KEY`** — needs the Access Key from a **new, dedicated** Web3Forms form (separate from any other project's form) tied to the business Gmail. Currently empty in `.dev.vars`; lead notification currently returns `notified: false, notifyError: "WEB3FORMS_ACCESS_KEY not configured"` (confirmed via local testing) until this is set. **Leads still save correctly to D1 regardless.**
-2. **Registered domain name** — required before running Google Ads (Cloudflare `*.pages.dev` subdomains are not accepted by Google Ads). Site is ready to connect to a custom domain via Cloudflare Pages once purchased.
-3. **Real business name and Gmail** — phone number is now confirmed real: **(914) 316-2170**, updated everywhere (header, footer, hero, calculator CTA, final CTA, FAQ, legal pages, chat widget error messages). Still placeholder:
+1. **Custom domain** — confirmed target: `westchesternyhardwoodfloors.com`. Not yet connected to the Cloudflare Pages project. Site currently lives at the `*.pages.dev` subdomain only (not accepted by Google Ads — a custom domain is required before running ads).
+2. **Real business name and Gmail** — phone number is confirmed real: **(914) 316-2170**, updated everywhere (header, footer, hero, calculator CTA, final CTA, FAQ, legal pages, chat widget error messages). Still placeholder:
    - Business name: "Westchester Hardwood Experts"
    - Email: info@westchesterhardwoodexperts.com
    - **Update these in `src/lib/layout.ts` and `src/routes/pages.ts` once confirmed.**
-4. **Production Cloudflare deployment** — D1/R2 currently created only in local dev mode; production `database_id` in `wrangler.jsonc` is a placeholder and must be set when deploying (via the Cloudflare deploy skill).
 
 ## Recommended Next Steps
-1. Get the Web3Forms Access Key (new form, not shared with other projects) and add it as a Cloudflare secret + local `.dev.vars` value.
+1. Buy/finalize the domain `westchesternyhardwoodfloors.com` and point its DNS to Cloudflare, then connect it to the Pages project (`wrangler pages domain add`).
 2. Confirm real business name / email and update site copy.
-3. Purchase and connect a registered domain (required for Google Ads compliance).
-4. Deploy to Cloudflare Pages production (create real D1 database + R2 bucket in the Cloudflare account, run migrations).
-5. Second iteration ideas: SMS confirmation, calendar sync for appointment windows, admin dashboard to view leads (with a "wants call now" priority flag for Luis), A/B testing hero copy, Google Ads conversion tracking (gtag) once domain is live.
+3. Second iteration ideas: SMS confirmation, calendar sync for appointment windows, admin dashboard to view leads (with a "wants call now" priority flag for Luis), A/B testing hero copy, Google Ads conversion tracking (gtag) once domain is live.
 
 ## User Guide
 1. Visit the landing page. Click **"Get My Estimate"** (primary CTA) or the chat bubble (bottom-right) to open **Michael AI**.
 2. Pick your project type from the buttons (Natural, Custom Stain, Red Oak Install, Prefinished, Pergo/Laminate).
 3. If Custom Stain, pick 2 or 3 coats.
 4. Enter your exact square footage.
-5. Optionally upload photos of your floor (or skip).
-6. Michael instantly shows your **exact estimated investment** — never a "final price", always with a transparency disclaimer.
-7. Choose **"Schedule My Visit"** or **"Call Me Now"** — fill in your name, phone, and check the consent box, then submit.
-8. Your request is saved and the business is notified (via Web3Forms email, once configured) — including whether you want an immediate call or a scheduled visit.
-9. For anything off-script (e.g. repairs), type it in the free-text box at the bottom — Michael will always offer a free in-person evaluation instead of guessing a price.
+5. Michael instantly shows your **exact estimated investment** — never a "final price", always with a transparency disclaimer.
+6. Choose **"Schedule My Visit"** or **"Call Me Now"** — fill in your name, phone, and check the consent box, then submit.
+7. Your request is saved and the business is notified by email — including whether you want an immediate call or a scheduled visit.
+8. For anything off-script (e.g. repairs), type it in the free-text box at the bottom — Michael will always offer a free in-person evaluation instead of guessing a price.
 
 ## Deployment
-- **Platform**: Cloudflare Pages (Hono + TypeScript + Tailwind CDN)
-- **Status**: ✅ Running locally in sandbox (PM2 + `wrangler pages dev`), fully tested end-to-end for v2 — ❌ Not yet deployed to production Cloudflare
-- **Tech Stack**: Hono, Cloudflare D1, Cloudflare R2, OpenAI-compatible LLM (`gpt-5` via Genspark proxy, fallback-only, no tool-calling in v2), Web3Forms for email notifications
-- **Last Updated**: 2026-07-20 (v2 pricing/wizard rebuild)
+- **Platform**: Cloudflare Pages (Hono + TypeScript + Tailwind CDN), deployed to Luis's own Cloudflare account (BYOK)
+- **Production URL**: https://michael-ai-hardwood.pages.dev *(custom domain `westchesternyhardwoodfloors.com` pending DNS setup)*
+- **GitHub**: https://github.com/apolo189/michael-ai-hardwood (branch `main`)
+- **Status**: ✅ **Deployed and live in production** — verified end-to-end (landing page, estimate calculator, lead submission all saving to production D1)
+- **Tech Stack**: Hono, Cloudflare D1, OpenAI-compatible LLM (`gpt-5` via Genspark proxy, fallback-only, no tool-calling in v2), Web3Forms for email notifications (client-side call)
+- **Last Updated**: 2026-07-21 (v2.3 — production deploy, photo upload removed)
