@@ -574,6 +574,20 @@
     })
   }
 
+  function minAppointmentDate() {
+    // Earliest selectable date is tomorrow (avoids same-day scheduling pressure).
+    const d = new Date()
+    d.setDate(d.getDate() + 1)
+    return d.toISOString().slice(0, 10)
+  }
+
+  function formatAppointmentDate(dateStr) {
+    if (!dateStr) return ''
+    const d = new Date(dateStr + 'T00:00:00')
+    if (isNaN(d.getTime())) return dateStr
+    return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  }
+
   function showBookingForm(wantsCallNow) {
     setTimeout(() => {
       addAssistantMessage(wantsCallNow ? "Great — leave your info below and a specialist will call you shortly." : "Great — let's get your visit scheduled.")
@@ -597,16 +611,15 @@
                 ${cityOptionsHtml}
               </select>
               ${wantsCallNow ? '' : `
-              <select name="appointmentDayPref" class="w-full border border-walnut-200 rounded-lg px-3 py-2 text-sm">
-                <option value="Monday-Friday">Monday - Friday</option>
-                <option value="Saturday morning">Saturday morning</option>
-              </select>
+              <label class="block text-xs text-walnut-500 -mb-1">Preferred visit date</label>
+              <input required type="date" name="appointmentDate" min="${minAppointmentDate()}" class="w-full border border-walnut-200 rounded-lg px-3 py-2 text-sm">
               <select name="appointmentWindow" required class="w-full border border-walnut-200 rounded-lg px-3 py-2 text-sm">
                 <option value="">Preferred time window</option>
                 <option>8 AM - 11 AM</option>
                 <option>11 AM - 2 PM</option>
                 <option>2 PM - 5 PM</option>
-              </select>`}
+              </select>
+              <p class="text-xs text-walnut-400">Available Monday - Friday, and Saturday mornings.</p>`}
               <label class="flex items-start gap-2 text-xs text-walnut-500 pt-1">
                 <input required type="checkbox" name="consentContact" class="mt-0.5">
                 <span>I agree to be contacted by phone, text, or email about my project. Consent is not required for purchase. Msg &amp; data rates may apply.</span>
@@ -654,7 +667,7 @@ Square Footage: ${payload.squareFootage ?? 'N/A'}${minimumNote}
 Desired Start: ${payload.timeline || 'N/A'}
 Estimated Investment: ${estimateText}
 
-Preferred Appointment Day(s): ${payload.appointmentDayPref || 'N/A'}
+Requested Visit Date: ${payload.appointmentDayPref || 'N/A'}
 Preferred Time Window: ${payload.appointmentWindow || 'N/A'}
 Wants a call now: ${payload.wantsCallNow ? 'YES - call ASAP' : 'No, scheduled visit preferred'}
 
@@ -697,7 +710,8 @@ ${payload.conversationSummary || 'N/A'}
       email: formData.get('email'),
       address: formData.get('address'),
       city: formData.get('city') || wizard.city,
-      appointmentDayPref: wantsCallNow ? '' : formData.get('appointmentDayPref'),
+      appointmentDate: wantsCallNow ? '' : formData.get('appointmentDate'),
+      appointmentDayPref: wantsCallNow ? '' : formatAppointmentDate(formData.get('appointmentDate')),
       appointmentWindow: wantsCallNow ? '' : formData.get('appointmentWindow'),
       consentContact: formData.get('consentContact') === 'on',
       conversationSummary: wizard.transcript.map((m) => `${m.role}: ${m.content}`).join('\n'),
@@ -732,8 +746,8 @@ ${payload.conversationSummary || 'N/A'}
         sendWeb3FormsNotification(payload).catch((e) => console.warn('Web3Forms notify failed:', e))
 
         const confirmMsg = wantsCallNow
-          ? `✅ Thank you, ${escapeHtml(payload.name)}! A flooring specialist will call you shortly at ${escapeHtml(payload.phone)}.`
-          : `✅ Thank you, ${escapeHtml(payload.name)}! Your request has been received. Our team will reach out to confirm your ${escapeHtml(payload.appointmentWindow || '')} appointment.`
+          ? `✅ Thank you, ${escapeHtml(payload.name)}! A flooring specialist will call you at ${escapeHtml(payload.phone)} within the next business day.`
+          : `✅ Thank you, ${escapeHtml(payload.name)}! You've requested a visit on <strong>${escapeHtml(formatAppointmentDate(payload.appointmentDate))}</strong>, between <strong>${escapeHtml(payload.appointmentWindow || '')}</strong>. Our team will call you within the next business day to confirm this date and time.`
         form.closest('.bg-white').outerHTML = `<div class="flex justify-start"><div class="chat-bubble-assistant px-4 py-3 max-w-[85%] text-sm">${confirmMsg}</div></div>`
       } else {
         throw new Error(res.data?.error || 'Unknown error')

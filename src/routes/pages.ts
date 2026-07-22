@@ -16,7 +16,7 @@ pages.get('/', (c) => {
         <div>
           <div class="flex flex-wrap items-center gap-3 mb-4">
             <p class="inline-flex items-center gap-2 text-forest-600 bg-forest-50 text-xs font-semibold px-3 py-1 rounded-full">
-              <i class="fas fa-map-marker-alt"></i> Serving New Rochelle, Larchmont, Rye, Scarsdale &amp; Pelham
+              <i class="fas fa-map-marker-alt"></i> Serving New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale &amp; Pelham
             </p>
             <p class="inline-flex items-center gap-2 text-gold-600 bg-gold-500/10 text-xs font-semibold px-3 py-1 rounded-full">
               <i class="fas fa-award"></i> 30+ Years Hardwood Experience
