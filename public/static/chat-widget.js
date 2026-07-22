@@ -664,15 +664,22 @@ Contact Consent (TCPA): ${payload.consentContact ? 'YES - customer agreed to be 
 ${payload.conversationSummary || 'N/A'}
 `.trim()
 
-    return axios.post('https://api.web3forms.com/submit', {
-      access_key: accessKey,
-      subject: '🔥 NEW HARDWOOD LEAD',
-      from_name: 'Michael AI - Hardwood Flooring Assistant',
-      name: payload.name || 'Website Lead',
-      email: payload.email || 'noreply@michaelai-hardwood.com',
-      phone: payload.phone || '',
-      message
-    })
+    // IMPORTANT: Web3Forms rejects the CORS preflight (OPTIONS) request that browsers
+    // automatically send before a JSON POST, which silently blocks the whole call
+    // (no email, no error visible to the visitor). Sending as
+    // application/x-www-form-urlencoded is a CORS "simple request" — no preflight is
+    // triggered, so this reaches Web3Forms successfully. Do NOT change this back to a
+    // plain JSON object.
+    const params = new URLSearchParams()
+    params.append('access_key', accessKey)
+    params.append('subject', '🔥 NEW HARDWOOD LEAD')
+    params.append('from_name', 'Michael AI - Hardwood Flooring Assistant')
+    params.append('name', payload.name || 'Website Lead')
+    params.append('email', payload.email || 'noreply@michaelai-hardwood.com')
+    params.append('phone', payload.phone || '')
+    params.append('message', message)
+
+    return axios.post('https://api.web3forms.com/submit', params)
   }
 
   async function onBookingSubmit(e, wantsCallNow) {
