@@ -746,8 +746,8 @@ ${payload.conversationSummary || 'N/A'}
         sendWeb3FormsNotification(payload).catch((e) => console.warn('Web3Forms notify failed:', e))
 
         const confirmMsg = wantsCallNow
-          ? `✅ Thank you, ${escapeHtml(payload.name)}! A flooring specialist will call you at ${escapeHtml(payload.phone)} within the next business day.`
-          : `✅ Thank you, ${escapeHtml(payload.name)}! You've requested a visit on <strong>${escapeHtml(formatAppointmentDate(payload.appointmentDate))}</strong>, between <strong>${escapeHtml(payload.appointmentWindow || '')}</strong>. Our team will call you within the next business day to confirm this date and time.`
+          ? `✅ Thank you, ${escapeHtml(payload.name)}! A flooring specialist will call you at ${escapeHtml(payload.phone)} within the next 30 minutes.`
+          : `✅ Thank you, ${escapeHtml(payload.name)}! You've requested a visit on <strong>${escapeHtml(formatAppointmentDate(payload.appointmentDate))}</strong>, between <strong>${escapeHtml(payload.appointmentWindow || '')}</strong>. Our team will call you within the next 30 minutes to confirm this date and time.`
         form.closest('.bg-white').outerHTML = `<div class="flex justify-start"><div class="chat-bubble-assistant px-4 py-3 max-w-[85%] text-sm">${confirmMsg}</div></div>`
       } else {
         throw new Error(res.data?.error || 'Unknown error')
