@@ -15,6 +15,14 @@ export function pageShell(opts: { title: string; description: string; bodyConten
   <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="/static/style.css" rel="stylesheet">
+  <!-- Google Ads Conversion Tracking (base tag) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18326378981"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-18326378981');
+  </script>
   <script>
     tailwind.config = {
       theme: {

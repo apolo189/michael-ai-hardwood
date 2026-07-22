@@ -711,7 +711,13 @@ ${payload.conversationSummary || 'N/A'}
       // 1. Always save the lead to our own database first (source of truth).
       const res = await axios.post('/api/lead/submit', payload)
       if (res.data && res.data.success) {
-        // 2. Send the email notification directly from the browser via Web3Forms.
+        // 2. Fire the Google Ads conversion event now that the lead is confirmed saved.
+        //    Guarded so a missing/blocked gtag (ad blockers, etc.) never breaks the flow.
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'conversion', { send_to: 'AW-18326378981/m7o5CNr3y9QcEOWz2aJE' })
+        }
+
+        // 3. Send the email notification directly from the browser via Web3Forms.
         //    Web3Forms' free plan requires client-side calls (their server-side
         //    API needs a paid plan + IP whitelisting), so we fire this from here
         //    instead of relying on the backend. Best-effort: if it fails, the
