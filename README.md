@@ -1,10 +1,14 @@
-# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.5 — Live on Custom Domain)
+# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.6 — Live on Custom Domain + Google Ads Conversion Tracking + Critical Email Fix)
 
 ## Project Overview
 - **Name**: Westchester Hardwood Experts — powered by Michael AI
 - **Goal**: Generate qualified hardwood flooring leads from Google Ads via a button-driven guided estimate wizard ("Michael AI") that educates homeowners, calculates a transparent, exact estimate, and hands off "hot" qualified leads to a human closer.
 - **Target Areas**: New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale, Pelham (Westchester County, NY)
 - **Business strategy**: **70% automation / 30% human** — Michael AI captures, educates, calculates, and qualifies. The human specialist (Luis) closes by phone or in-person visit. *"Michael AI abre la puerta. Luis cierra el trabajo."*
+
+## What's New in v2.6 (Google Ads Conversion Tracking + Critical Lead-Notification Email Bug Fixed)
+- **Google Ads conversion tracking added**: `gtag.js` base snippet loads on every page (`AW-18326378981`), and the `conversion` event (`AW-18326378981/m7o5CNr3y9QcEOWz2aJE`) fires only when a lead is successfully saved via `/api/lead/submit` — not on every page view, so Google Ads only counts real leads, not casual visits.
+- **Critical bug fixed: the lead-notification email to Luis was silently failing for every real visitor.** Root cause: `sendWeb3FormsNotification()` sent the request body as JSON, which triggers a browser CORS preflight (`OPTIONS`) request — and Web3Forms rejects that preflight, so the browser cancels the whole call before it ever reaches Web3Forms. No error was shown to the visitor (the lead still saved fine to D1), but Luis never got the email or notification sound. **Fixed by switching the request body to `application/x-www-form-urlencoded`** (via `URLSearchParams`), which is a CORS "simple request" that browsers do not preflight — confirmed working end-to-end from a real browser against the production Web3Forms endpoint on the live custom domain. Checked all leads in production D1 at the time of the fix: only 2 test leads existed (no real customer leads were lost — this was caught before any real customer was affected).
 
 ## What's New in v2.5 (Custom Domain Live + Conversational Copy Polish + 500 sq ft Minimum + Prefinished Price Update)
 - **Custom domain fully connected and live**: `westchesternyhardwoodfloors.com` and `www.westchesternyhardwoodfloors.com` are both verified, active, and serving HTTPS traffic with valid SSL certificates (Google Trust Services) on the `michael-ai-hardwood` Cloudflare Pages project. DNS is managed in Cloudflare (two proxied CNAME records, both pointing to `michael-ai-hardwood.pages.dev`). Confirmed zero console/JS errors on the live custom domain.
@@ -151,4 +155,4 @@ The AI **never** invents a price. All totals are calculated by `calculateEstimat
 - **GitHub**: https://github.com/apolo189/michael-ai-hardwood (branch `main`)
 - **Status**: ✅ **Deployed and live in production on the custom domain** — verified end-to-end (landing page, estimate calculator, lead submission all saving to production D1, v3 chat flow with conversational copy polish, 500 sq ft minimum, and updated Prefinished pricing all live with zero console/JS errors on the custom domain)
 - **Tech Stack**: Hono, Cloudflare D1, OpenAI-compatible LLM (`gpt-5` via Genspark proxy, fallback-only, no tool-calling), Web3Forms for email notifications (client-side call)
-- **Last Updated**: 2026-07-22 (v2.5 — custom domain connected, conversational copy polish, 500 sq ft minimum billing floor, Prefinished price updated to $3.50/sq ft)
+- **Last Updated**: 2026-07-22 (v2.6 — Google Ads conversion tracking added, critical lead-notification email bug fixed)
