@@ -1,10 +1,21 @@
-# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.4 — Live on Cloudflare)
+# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.5 — Live on Custom Domain)
 
 ## Project Overview
 - **Name**: Westchester Hardwood Experts — powered by Michael AI
 - **Goal**: Generate qualified hardwood flooring leads from Google Ads via a button-driven guided estimate wizard ("Michael AI") that educates homeowners, calculates a transparent, exact estimate, and hands off "hot" qualified leads to a human closer.
 - **Target Areas**: New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale, Pelham (Westchester County, NY)
 - **Business strategy**: **70% automation / 30% human** — Michael AI captures, educates, calculates, and qualifies. The human specialist (Luis) closes by phone or in-person visit. *"Michael AI abre la puerta. Luis cierra el trabajo."*
+
+## What's New in v2.5 (Custom Domain Live + Conversational Copy Polish + 500 sq ft Minimum + Prefinished Price Update)
+- **Custom domain fully connected and live**: `westchesternyhardwoodfloors.com` and `www.westchesternyhardwoodfloors.com` are both verified, active, and serving HTTPS traffic with valid SSL certificates (Google Trust Services) on the `michael-ai-hardwood` Cloudflare Pages project. DNS is managed in Cloudflare (two proxied CNAME records, both pointing to `michael-ai-hardwood.pages.dev`). Confirmed zero console/JS errors on the live custom domain.
+- **Conversational copy polish** ("Parsero" feedback) — Michael's guided wizard now reads like a human consultant instead of a form:
+  - Service selection reply includes a short service-specific remark (e.g. *"Great choice. Sanding and refinishing is one of our most requested services."*) before moving to the next question.
+  - After square footage is entered, a size-aware comment is added (small/medium/large project framing) before asking about timeline.
+  - The city question is reframed as *"And just to make sure we schedule the right team for your area — which city is the project located in?"* instead of a bare form label.
+  - Right before the price is revealed, Michael adds a contextualizing sentence — e.g. *"Based on what you've shared, your floors appear to be a great candidate for refinishing."* — tailored to the selected service (skipped for repairs, which have no price).
+  - Purely copy/text changes — no changes to structure, pricing, or the 5-second pacing.
+- **500 sq ft minimum project size (billing floor)**: Any project under 500 sq ft is now billed as if it were 500 sq ft (`MINIMUM_PROJECT_SQFT` in `src/lib/pricing.ts`), applied consistently whether the visitor types an exact square footage or uses the "I don't know" room-count/room-size fallback. The estimate result now carries both the raw `squareFootage` and the `billedSquareFootage` plus a `minimumApplied` flag, so the UI shows a transparent note (*"Your project (X sq ft) is billed at our 500-sq-ft minimum, which covers setup, materials, and travel for smaller jobs."*) instead of a silent price bump, and the email notification to Luis includes the same note.
+- **Prefinished Hardwood Installation price updated**: **$2.75/sq ft → $3.50/sq ft**. Updated in both the pricing engine (`src/lib/pricing.ts`) and the landing page's Services grid display copy (`src/routes/pages.ts`), so the two stay in sync.
 
 ## What's New in v2.4 (Consultant Conversation Flow + Critical Bug Fix + Hero Polish)
 - **Chat flow completely redesigned to feel consultative, not transactional.** Previous flow (service → sqft → instant price, ~10 seconds) felt like a calculator. New flow (`chat-widget.js`, "Consultant Flow v3"):
@@ -61,11 +72,13 @@ Landing page design review feedback: the site was "clean and professional but mi
 | Sanding & Refinishing — Custom Stain, 2 coats | **$3.50/sq ft** | |
 | Sanding & Refinishing — Custom Stain, 3 coats | **$4.00/sq ft** | Extra durability, longer drying time |
 | Red Oak Installation 2 1/4" | **$3.75/sq ft** | Labor only, material separate |
-| Prefinished Hardwood Installation | **$2.75/sq ft** | Labor only, material separate |
+| Prefinished Hardwood Installation | **$3.50/sq ft** | Labor only, material separate (updated 2026-07-21, was $2.75) |
 | Pergo / Laminate Installation | **$3.00/sq ft** | Labor only, material separate |
 | Repairs | *No online price* | Now a formal Q1 button ("Repair Hardwood Floors") as of v2.4, but still never priced — always routes to a no-obligation in-person evaluation card |
 
-The AI **never** invents a price. All totals are calculated by `calculateEstimate()` in `src/lib/pricing.ts` and returned as an exact whole-dollar total (`Math.round(sqft * pricePerSqFt)`), never a range.
+The AI **never** invents a price. All totals are calculated by `calculateEstimate()` in `src/lib/pricing.ts` and returned as an exact whole-dollar total (`Math.round(billedSqft * pricePerSqFt)`), never a range.
+
+**500 sq ft minimum billing floor**: Any project under 500 sq ft is billed as if it were 500 sq ft (`MINIMUM_PROJECT_SQFT = 500`). This applies to every service above. The estimate response includes `billedSquareFootage` (what's actually charged) and `minimumApplied` (boolean) alongside the original `squareFootage` (what the customer entered), so the UI/email can show a transparent "minimum applied" note rather than a silent price increase.
 
 ## Features Completed ✅
 - **Premium landing page** — Hero with before/after transformation imagery + compliance disclaimer + dual CTA (Get My Estimate / Call Now), Trust section, "Old Way vs Our Way" section, Services grid, Service Areas, FAQ, final dual CTA
@@ -110,16 +123,15 @@ The AI **never** invents a price. All totals are calculated by `calculateEstimat
 - **Static images** — `public/static/images/floor-before.jpg` / `floor-after.jpg` (AI-generated, v2.1 regenerated for more emotional contrast, optimized to ~185-190KB JPEGs), `michael-ai-avatar.jpg` (AI-generated illustrated/vector icon, ~21KB, deliberately non-photorealistic)
 
 ## ⚠️ Pending / Not Yet Configured
-1. **Custom domain** — confirmed target: `westchesternyhardwoodfloors.com` (purchased via Hostinger). Nameservers have been updated at the registrar to Cloudflare's (`milan.ns.cloudflare.com`, `paige.ns.cloudflare.com`) and are confirmed propagated via independent DNS lookups (Google DNS, Cloudflare DNS). Cloudflare's zone dashboard has not yet flipped to "Active" (its periodic activation check can lag behind actual DNS propagation by minutes to hours) — once it does, the final step is connecting the domain to the `michael-ai-hardwood` Pages project (Cloudflare dashboard → Workers & Pages → michael-ai-hardwood → Custom domains → Add). Site currently lives at the `*.pages.dev` subdomain only (not accepted by Google Ads — a custom domain is required before running ads).
-2. **Real business name and Gmail** — phone number is confirmed real: **(914) 316-2170**, updated everywhere (header, footer, hero, calculator CTA, final CTA, FAQ, legal pages, chat widget error messages). Still placeholder:
+1. **Real business name and Gmail** — phone number is confirmed real: **(914) 316-2170**, updated everywhere (header, footer, hero, calculator CTA, final CTA, FAQ, legal pages, chat widget error messages). Still placeholder:
    - Business name: "Westchester Hardwood Experts"
    - Email: info@westchesterhardwoodexperts.com
    - **Update these in `src/lib/layout.ts` and `src/routes/pages.ts` once confirmed.**
 
 ## Recommended Next Steps
-1. Finish connecting `westchesternyhardwoodfloors.com` once the Cloudflare zone shows "Active" (nameservers already propagated — see Pending section above).
-2. Confirm real business name / email and update site copy.
-3. Second iteration ideas: SMS confirmation, calendar sync for appointment windows, admin dashboard to view leads (with a "wants call now" priority flag for Luis), A/B testing hero copy, Google Ads conversion tracking (gtag) once domain is live, optionally persist `timeline` to D1 if Luis wants it queryable/reportable later.
+1. Confirm real business name / email and update site copy.
+2. Now that the custom domain is live, set up Google Ads conversion tracking (gtag) and submit the site for Google Ads review.
+3. Second iteration ideas: SMS confirmation, calendar sync for appointment windows, admin dashboard to view leads (with a "wants call now" priority flag for Luis), A/B testing hero copy, optionally persist `timeline` to D1 if Luis wants it queryable/reportable later.
 
 ## User Guide
 1. Visit the landing page. Click **"Get My Estimate"** (primary CTA) or the chat bubble (bottom-right) to open **Michael AI**.
@@ -135,8 +147,8 @@ The AI **never** invents a price. All totals are calculated by `calculateEstimat
 
 ## Deployment
 - **Platform**: Cloudflare Pages (Hono + TypeScript + Tailwind CDN), deployed to Luis's own Cloudflare account (BYOK)
-- **Production URL**: https://michael-ai-hardwood.pages.dev *(custom domain `westchesternyhardwoodfloors.com` pending DNS setup)*
+- **Production URL**: https://westchesternyhardwoodfloors.com (custom domain, live with valid SSL) — also reachable at https://www.westchesternyhardwoodfloors.com and the underlying https://michael-ai-hardwood.pages.dev
 - **GitHub**: https://github.com/apolo189/michael-ai-hardwood (branch `main`)
-- **Status**: ✅ **Deployed and live in production** — verified end-to-end (landing page, estimate calculator, lead submission all saving to production D1, new v3 chat flow live with zero console/JS errors)
+- **Status**: ✅ **Deployed and live in production on the custom domain** — verified end-to-end (landing page, estimate calculator, lead submission all saving to production D1, v3 chat flow with conversational copy polish, 500 sq ft minimum, and updated Prefinished pricing all live with zero console/JS errors on the custom domain)
 - **Tech Stack**: Hono, Cloudflare D1, OpenAI-compatible LLM (`gpt-5` via Genspark proxy, fallback-only, no tool-calling), Web3Forms for email notifications (client-side call)
-- **Last Updated**: 2026-07-21 (v2.4 — consultant conversation flow redesign, critical chat-widget bug fix, hero photo enlargement)
+- **Last Updated**: 2026-07-22 (v2.5 — custom domain connected, conversational copy polish, 500 sq ft minimum billing floor, Prefinished price updated to $3.50/sq ft)
