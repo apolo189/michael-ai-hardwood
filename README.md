@@ -1,10 +1,17 @@
-# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.6 — Live on Custom Domain + Google Ads Conversion Tracking + Critical Email Fix)
+# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.7 — Lead-Save Bug Fixed + End-to-End Email Delivery Verified)
 
 ## Project Overview
 - **Name**: Westchester Hardwood Experts — powered by Michael AI
 - **Goal**: Generate qualified hardwood flooring leads from Google Ads via a button-driven guided estimate wizard ("Michael AI") that educates homeowners, calculates a transparent, exact estimate, and hands off "hot" qualified leads to a human closer.
 - **Target Areas**: New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale, Pelham (Westchester County, NY)
 - **Business strategy**: **70% automation / 30% human** — Michael AI captures, educates, calculates, and qualifies. The human specialist (Luis) closes by phone or in-person visit. *"Michael AI abre la puerta. Luis cierra el trabajo."*
+
+## What's New in v2.7 (Critical Lead-Save Bug Fixed + Email Delivery Confirmed End-to-End on Real Devices)
+- **Root cause finally found and fixed: `/api/lead/submit` was silently swallowing D1 insert failures.** The endpoint's `catch` block only logged the DB error to the console and then unconditionally returned `{ success: true }` to the browser — so a visitor could see the green "✅ Thank you" confirmation message while their lead was **never actually saved**, and (since the Web3Forms email is only fired *after* a successful save) the notification email was never even attempted. Fixed in `src/routes/lead.ts`: a genuine insert failure now returns `{ success: false, error: 'db_insert_failed', detail: ... }` with HTTP 500, so a failed save can never be silently reported as a success again.
+- **Web3Forms notification call reverted to `fetch()` + JSON body** (matches Web3Forms' own documented best practice and the proven-working reference implementation) — `sendWeb3FormsNotification()` in `chat-widget.js`.
+- **"Next business day" wording corrected to "next 30 minutes"** in both booking confirmation messages, matching Luis's real callback SLA.
+- **Full end-to-end flow verified live, on a real phone, in Incognito** (no browser extensions, no caching): booking form submitted → confirmation message shown → lead row confirmed present in production D1 → notification email confirmed received in Gmail inbox on Luis's phone, with sound — closing the loop that was reported broken at the start of this session.
+- **Diagnostic note for future reference**: while debugging, curl-simulated requests against `/api/lead/submit` always saved correctly, which at one point looked like a mysterious "browser vs curl" discrepancy. In the end, a clean real-device test (Incognito, no extensions, submissions spaced apart in time rather than rapid-fire) confirmed the pipeline works correctly; the earlier failed real-world attempts most likely coincided with Web3Forms' automatic per-IP rate-limiting (it blocks an IP for ~1 hour after too many rapid test submissions — documented at https://docs.web3forms.com/getting-started/troubleshooting), which was inadvertently triggered by the volume of back-to-back manual tests during debugging.
 
 ## What's New in v2.6 (Google Ads Conversion Tracking + Critical Lead-Notification Email Bug Fixed)
 - **Google Ads conversion tracking added**: `gtag.js` base snippet loads on every page (`AW-18326378981`), and the `conversion` event (`AW-18326378981/m7o5CNr3y9QcEOWz2aJE`) fires only when a lead is successfully saved via `/api/lead/submit` — not on every page view, so Google Ads only counts real leads, not casual visits.
@@ -153,6 +160,6 @@ The AI **never** invents a price. All totals are calculated by `calculateEstimat
 - **Platform**: Cloudflare Pages (Hono + TypeScript + Tailwind CDN), deployed to Luis's own Cloudflare account (BYOK)
 - **Production URL**: https://westchesternyhardwoodfloors.com (custom domain, live with valid SSL) — also reachable at https://www.westchesternyhardwoodfloors.com and the underlying https://michael-ai-hardwood.pages.dev
 - **GitHub**: https://github.com/apolo189/michael-ai-hardwood (branch `main`)
-- **Status**: ✅ **Deployed and live in production on the custom domain** — verified end-to-end (landing page, estimate calculator, lead submission all saving to production D1, v3 chat flow with conversational copy polish, 500 sq ft minimum, and updated Prefinished pricing all live with zero console/JS errors on the custom domain)
+- **Status**: ✅ **Deployed and live in production on the custom domain** — verified end-to-end (landing page, estimate calculator, lead submission all saving to production D1, v3 chat flow with conversational copy polish, 500 sq ft minimum, and updated Prefinished pricing all live with zero console/JS errors on the custom domain). **Full lead capture + email notification pipeline confirmed working on a real device as of 2026-07-23** (lead saved to D1 + email received with sound on Luis's phone from a real Incognito browser test).
 - **Tech Stack**: Hono, Cloudflare D1, OpenAI-compatible LLM (`gpt-5` via Genspark proxy, fallback-only, no tool-calling), Web3Forms for email notifications (client-side call)
-- **Last Updated**: 2026-07-22 (v2.6 — Google Ads conversion tracking added, critical lead-notification email bug fixed)
+- **Last Updated**: 2026-07-23 (v2.7 — critical `/api/lead/submit` silent-failure bug fixed; email delivery confirmed end-to-end on a real device)
