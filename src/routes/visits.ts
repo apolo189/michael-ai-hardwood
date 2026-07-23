@@ -731,21 +731,54 @@ function detailPageBody(visit: any, rooms: any[], photos: any[], shareUrl: strin
         <h2 class="font-bold text-gray-800"><i class="fas fa-camera text-amber-600 mr-2"></i>Photos</h2>
       </div>
       ${isAdminView ? `
-        <form method="POST" action="/admin/visits/${visit.id}/photo" enctype="multipart/form-data" class="flex flex-wrap items-end gap-3 mb-4 border border-dashed border-gray-300 rounded p-3">
-          <div>
-            <label class="block text-xs text-gray-500 mb-1">Photo</label>
-            <input type="file" name="photo" accept="image/*" capture="environment" required class="text-sm">
+        <form method="POST" action="/admin/visits/${visit.id}/photo" enctype="multipart/form-data" class="mb-4 border border-dashed border-gray-300 rounded p-3" id="photoForm">
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <label class="bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 rounded cursor-pointer">
+              <i class="fas fa-camera mr-1"></i> Take a Picture
+              <input type="file" accept="image/*" capture="environment" class="hidden" onchange="pickPhoto(this)">
+            </label>
+            <label class="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-sm font-semibold px-4 py-2 rounded cursor-pointer">
+              <i class="fas fa-folder-open mr-1"></i> Upload a Photo
+              <input type="file" accept="image/*" class="hidden" onchange="pickPhoto(this)">
+            </label>
+            <input type="file" name="photo" id="photoRealInput" class="hidden" required>
           </div>
-          <div>
-            <label class="block text-xs text-gray-500 mb-1">Room (optional)</label>
-            <input type="text" name="room_name" class="border border-gray-300 rounded px-2 py-1 text-sm">
+          <div id="photoPreviewBox" class="hidden mb-3">
+            <img id="photoPreviewImg" class="h-32 rounded-lg border border-gray-300 object-cover">
+            <p class="text-xs text-green-700 mt-1"><i class="fas fa-check-circle mr-1"></i>Photo ready — fill in the details below and tap Upload.</p>
           </div>
-          <div>
-            <label class="block text-xs text-gray-500 mb-1">Caption (optional)</label>
-            <input type="text" name="caption" class="border border-gray-300 rounded px-2 py-1 text-sm">
+          <div class="flex flex-wrap items-end gap-3">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Room (optional)</label>
+              <input type="text" name="room_name" class="border border-gray-300 rounded px-2 py-1 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">Caption (optional)</label>
+              <input type="text" name="caption" class="border border-gray-300 rounded px-2 py-1 text-sm">
+            </div>
+            <button type="submit" id="photoUploadBtn" disabled class="bg-gray-300 text-gray-500 cursor-not-allowed text-sm font-semibold px-4 py-2 rounded"><i class="fas fa-upload mr-1"></i> Upload</button>
           </div>
-          <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 rounded"><i class="fas fa-upload mr-1"></i> Upload</button>
         </form>
+        <script>
+          function pickPhoto(input) {
+            if (!input.files || !input.files[0]) return
+            const file = input.files[0]
+            const dt = new DataTransfer()
+            dt.items.add(file)
+            const realInput = document.getElementById('photoRealInput')
+            realInput.files = dt.files
+
+            const reader = new FileReader()
+            reader.onload = function(e) {
+              document.getElementById('photoPreviewImg').src = e.target.result
+              document.getElementById('photoPreviewBox').classList.remove('hidden')
+              const btn = document.getElementById('photoUploadBtn')
+              btn.disabled = false
+              btn.className = 'bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold px-4 py-2 rounded'
+            }
+            reader.readAsDataURL(file)
+          }
+        </script>
       ` : ''}
       <div class="photo-grid grid grid-cols-2 md:grid-cols-4 gap-3">
         ${photosHtml || '<p class="text-gray-400 text-sm col-span-4">No photos yet.</p>'}
