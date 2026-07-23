@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { basicAuth } from 'hono/basic-auth'
+import { getCookie, setCookie } from 'hono/cookie'
 
 // ---------------------------------------------------------------------------
 // READ-ONLY admin dashboard for viewing leads saved in D1.
@@ -7,9 +7,15 @@ import { basicAuth } from 'hono/basic-auth'
 // IMPORTANT: This file is completely isolated from the lead-saving/email
 // flow (src/routes/lead.ts + chat-widget.js). It only ever runs SELECT
 // queries — it never INSERTs, UPDATEs, or DELETEs anything, and it is only
-// reached when someone manually visits /admin/leads with the correct
+// reached when someone manually visits /admin and logs in with the
 // password. Nothing here executes as part of a customer submitting the
 // booking form.
+//
+// Auth approach: a plain HTML login form (not HTTP Basic Auth) — some
+// mobile browsers / in-app browsers (e.g. opening a link from WhatsApp)
+// don't reliably show the native Basic Auth prompt, which caused a
+// persistent "Unauthorized" with no way to even type a password. A normal
+// form + session cookie works consistently everywhere.
 // ---------------------------------------------------------------------------
 
 type Bindings = {
@@ -19,20 +25,89 @@ type Bindings = {
 
 const admin = new Hono<{ Bindings: Bindings }>()
 
-// Simple password protection (HTTP Basic Auth). Username can be anything;
-// password comes from the ADMIN_PASSWORD secret (set via wrangler secret /
-// .dev.vars locally). If the secret isn't set, access is denied by default
-// rather than left open.
-admin.use('/*', async (c, next) => {
+const SESSION_COOKIE = 'michael_admin_session'
+
+// Simple, non-secret-dependent session token derived from the password
+// itself (no extra KV/secret needed) — good enough for a low-stakes,
+// single-admin read-only dashboard behind HTTPS.
+async function sessionTokenFor(password: string): Promise<string> {
+  const data = new TextEncoder().encode('michael-ai-admin:' + password)
+  const digest = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+function loginPage(error?: string) {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Michael AI — Admin Login</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+      <div class="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full">
+        <h1 class="text-xl font-bold text-gray-800 mb-1">🔒 Leads Dashboard</h1>
+        <p class="text-sm text-gray-500 mb-6">Michael AI — Hardwood Flooring</p>
+        ${error ? `<p class="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mb-4">${error}</p>` : ''}
+        <form method="POST" action="/admin/login">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input type="password" name="password" autofocus required
+            class="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          <button type="submit"
+            class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 rounded">
+            View Leads
+          </button>
+        </form>
+      </div>
+    </body>
+    </html>
+  `
+}
+
+async function isAuthed(c: any): Promise<boolean> {
+  const password = c.env.ADMIN_PASSWORD
+  if (!password) return false
+  const cookie = getCookie(c, SESSION_COOKIE)
+  if (!cookie) return false
+  const expected = await sessionTokenFor(password)
+  return cookie === expected
+}
+
+// GET /admin -> redirect to /admin/leads (convenience)
+admin.get('/', (c) => c.redirect('/admin/leads'))
+
+admin.get('/login', (c) => {
+  return c.html(loginPage())
+})
+
+admin.post('/login', async (c) => {
   const password = c.env.ADMIN_PASSWORD
   if (!password) {
-    return c.text('Admin dashboard is not configured yet (missing ADMIN_PASSWORD).', 503)
+    return c.html(loginPage('Admin dashboard is not configured yet (missing ADMIN_PASSWORD).'), 503)
   }
-  const auth = basicAuth({ username: 'luis', password })
-  return auth(c, next)
+  const body = await c.req.parseBody()
+  const entered = String(body.password || '')
+  if (entered !== password) {
+    return c.html(loginPage('Incorrect password. Please try again.'), 401)
+  }
+  const token = await sessionTokenFor(password)
+  setCookie(c, SESSION_COOKIE, token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'Lax',
+    path: '/admin',
+    maxAge: 60 * 60 * 24 * 30 // 30 days
+  })
+  return c.redirect('/admin/leads')
 })
 
 admin.get('/leads', async (c) => {
+  if (!(await isAuthed(c))) {
+    return c.redirect('/admin/login')
+  }
+
   const { env } = c
   const { results } = await env.DB.prepare(
     `SELECT id, name, phone, email, address, city, service, square_footage,
