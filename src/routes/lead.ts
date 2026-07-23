@@ -73,8 +73,11 @@ lead.post('/submit', async (c) => {
         wantsCallNow ? 1 : 0
       )
       .run()
-  } catch (err) {
+  } catch (err: any) {
+    // IMPORTANT: never silently swallow this — a failed insert must not report
+    // "success" to the browser, otherwise the lead is lost with no trace.
     console.error('DB insert error:', err)
+    return c.json({ success: false, error: 'db_insert_failed', detail: String(err?.message || err) }, 500)
   }
 
   return c.json({ success: true })
