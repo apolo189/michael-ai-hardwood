@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
-import { getCookie, setCookie } from 'hono/cookie'
+import { setCookie } from 'hono/cookie'
+import { isAuthed, sessionTokenFor, SESSION_COOKIE } from '../lib/adminAuth'
 
 // ---------------------------------------------------------------------------
 // READ-ONLY admin dashboard for viewing leads saved in D1.
@@ -25,17 +26,6 @@ type Bindings = {
 
 const admin = new Hono<{ Bindings: Bindings }>()
 
-const SESSION_COOKIE = 'michael_admin_session'
-
-// Simple, non-secret-dependent session token derived from the password
-// itself (no extra KV/secret needed) — good enough for a low-stakes,
-// single-admin read-only dashboard behind HTTPS.
-async function sessionTokenFor(password: string): Promise<string> {
-  const data = new TextEncoder().encode('michael-ai-admin:' + password)
-  const digest = await crypto.subtle.digest('SHA-256', data)
-  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('')
-}
-
 function loginPage(error?: string) {
   return `
     <!DOCTYPE html>
@@ -48,7 +38,7 @@ function loginPage(error?: string) {
     </head>
     <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
       <div class="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full">
-        <h1 class="text-xl font-bold text-gray-800 mb-1">🔒 Leads Dashboard</h1>
+        <h1 class="text-xl font-bold text-gray-800 mb-1">🔒 Admin Dashboard</h1>
         <p class="text-sm text-gray-500 mb-6">Michael AI — Hardwood Flooring</p>
         ${error ? `<p class="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2 mb-4">${error}</p>` : ''}
         <form method="POST" action="/admin/login">
@@ -57,7 +47,7 @@ function loginPage(error?: string) {
             class="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-amber-500" />
           <button type="submit"
             class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 rounded">
-            View Leads
+            Enter
           </button>
         </form>
       </div>
@@ -66,13 +56,17 @@ function loginPage(error?: string) {
   `
 }
 
-async function isAuthed(c: any): Promise<boolean> {
-  const password = c.env.ADMIN_PASSWORD
-  if (!password) return false
-  const cookie = getCookie(c, SESSION_COOKIE)
-  if (!cookie) return false
-  const expected = await sessionTokenFor(password)
-  return cookie === expected
+export function adminNav(active: 'leads' | 'visits') {
+  return `
+    <nav class="mb-6 flex gap-2">
+      <a href="/admin/leads" class="px-4 py-2 rounded text-sm font-semibold ${active === 'leads' ? 'bg-amber-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}">
+        <i class="fas fa-list-check mr-1"></i> Leads
+      </a>
+      <a href="/admin/visits" class="px-4 py-2 rounded text-sm font-semibold ${active === 'visits' ? 'bg-amber-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}">
+        <i class="fas fa-clipboard-list mr-1"></i> Site Visits
+      </a>
+    </nav>
+  `
 }
 
 // GET /admin -> redirect to /admin/leads (convenience)
@@ -97,7 +91,7 @@ admin.post('/login', async (c) => {
     httpOnly: true,
     secure: true,
     sameSite: 'Lax',
-    path: '/admin',
+    path: '/',
     maxAge: 60 * 60 * 24 * 30 // 30 days
   })
   return c.redirect('/admin/leads')
@@ -157,15 +151,16 @@ admin.get('/leads', async (c) => {
     </head>
     <body class="bg-gray-100 min-h-screen p-4 md:p-8">
       <div class="max-w-7xl mx-auto">
-        <header class="flex items-center justify-between mb-6">
+        <header class="flex items-center justify-between mb-4">
           <h1 class="text-2xl font-bold text-gray-800">
             <i class="fas fa-list-check text-amber-600 mr-2"></i>
-            Leads — Michael AI Hardwood
+            Michael AI — Admin
           </h1>
           <div class="text-sm text-gray-500">
             <i class="fas fa-rotate mr-1"></i> Auto-refreshes every 60s &middot; Showing latest ${rows.length} lead(s)
           </div>
         </header>
+        ${adminNav('leads')}
 
         <div class="bg-white rounded-lg shadow overflow-x-auto">
           <table class="min-w-full">

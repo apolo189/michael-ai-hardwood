@@ -12,5 +12,11 @@
       "database_name": "michael-ai-hardwood-production",
       "database_id": "c4390bab-6ac2-4895-b04d-477cf75ecd13"
     }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS",
+      "bucket_name": "michael-ai-hardwood-photos"
+    }
   ]
 }
