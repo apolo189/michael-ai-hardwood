@@ -678,9 +678,16 @@ ${payload.conversationSummary || 'N/A'}
 `.trim()
 
     // Use fetch() + JSON body (Web3Forms' own recommended, proven-working method).
+    // IMPORTANT: keepalive:true tells the browser to finish sending this request
+    // even if the page is navigated away from, backgrounded, or the screen is
+    // locked right after tapping submit (very common on mobile right after a
+    // form is confirmed) — without this, mobile browsers can silently abort
+    // the request before it ever reaches Web3Forms, even though the lead was
+    // already safely saved to our own database in the step before this one.
     return fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      keepalive: true,
       body: JSON.stringify({
         access_key: accessKey,
         subject: '🔥 NEW HARDWOOD LEAD',
