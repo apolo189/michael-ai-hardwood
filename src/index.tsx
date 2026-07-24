@@ -7,6 +7,7 @@ import lead from './routes/lead'
 import admin from './routes/admin'
 import visits from './routes/visits'
 import share from './routes/share'
+import card from './routes/card'
 
 type Bindings = {
   DB: D1Database
@@ -38,6 +39,10 @@ app.route('/admin/visits', visits)
 // Public, no-login, read-only share page for a single visit (WhatsApp link
 // to subcontractor) — scoped by an unguessable share_token, see src/routes/share.ts.
 app.route('/share', share)
+
+// Digital business card (single shareable page, no login) — see src/routes/card.ts
+app.route('/tarjeta', card)
+app.route('/card', card)
 
 // Pages (landing page, legal pages, etc.)
 app.route('/', pages)
