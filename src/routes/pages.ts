@@ -309,10 +309,10 @@ pages.get('/privacy-policy', (c) => {
         <p>We retain your information only as long as necessary to fulfill your request and applicable business or legal requirements, and we use industry-standard measures to protect it.</p>
 
         <h2 class="text-xl font-bold text-walnut-900 mt-8">Your Rights</h2>
-        <p>You may request access to, correction of, or deletion of your personal information at any time by contacting us at <a href="mailto:info@westchesterhardwoodexperts.com" class="underline">info@westchesterhardwoodexperts.com</a>.</p>
+        <p>You may request access to, correction of, or deletion of your personal information at any time by contacting us at <a href="mailto:luisomorgado4@gmail.com" class="underline">luisomorgado4@gmail.com</a>.</p>
 
         <h2 class="text-xl font-bold text-walnut-900 mt-8">Contact Us</h2>
-        <p>Westchester Hardwood Experts<br>Phone: (914) 316-2170<br>Email: info@westchesterhardwoodexperts.com</p>
+        <p>Westchester Hardwood Experts<br>Phone: (914) 316-2170<br>Email: luisomorgado4@gmail.com</p>
       </div>
     </div>
   </section>
@@ -349,7 +349,7 @@ pages.get('/terms-of-service', (c) => {
         <p>We may update these Terms from time to time. Continued use of the Site constitutes acceptance of the updated Terms.</p>
 
         <h2 class="text-xl font-bold text-walnut-900 mt-8">Contact</h2>
-        <p>Westchester Hardwood Experts<br>Phone: (914) 316-2170<br>Email: info@westchesterhardwoodexperts.com</p>
+        <p>Westchester Hardwood Experts<br>Phone: (914) 316-2170<br>Email: luisomorgado4@gmail.com</p>
       </div>
     </div>
   </section>
@@ -364,7 +364,7 @@ pages.get('/accessibility', (c) => {
       <h1 class="font-serif text-4xl font-bold text-walnut-900 mb-6">Accessibility Statement</h1>
       <div class="space-y-6 text-walnut-700 leading-relaxed">
         <p>Westchester Hardwood Experts is committed to ensuring digital accessibility for people of all abilities. We are continually improving the user experience for everyone and applying relevant accessibility standards.</p>
-        <p>If you experience any difficulty accessing content on this website or interacting with Michael AI, please contact us at <a href="mailto:info@westchesterhardwoodexperts.com" class="underline">info@westchesterhardwoodexperts.com</a> or call (914) 316-2170, and we will make reasonable efforts to assist you.</p>
+        <p>If you experience any difficulty accessing content on this website or interacting with Michael AI, please contact us at <a href="mailto:luisomorgado4@gmail.com" class="underline">luisomorgado4@gmail.com</a> or call (914) 316-2170, and we will make reasonable efforts to assist you.</p>
       </div>
     </div>
   </section>
@@ -396,7 +396,7 @@ pages.get('/contact', (c) => {
       <p class="text-walnut-600 mb-8">Have a question before chatting with Michael AI? Reach out directly.</p>
       <div class="space-y-3 text-walnut-800">
         <p><i class="fas fa-phone mr-2 text-walnut-500"></i><a href="tel:+19143162170" class="font-semibold">(914) 316-2170</a></p>
-        <p><i class="fas fa-envelope mr-2 text-walnut-500"></i><a href="mailto:info@westchesterhardwoodexperts.com" class="font-semibold">info@westchesterhardwoodexperts.com</a></p>
+        <p><i class="fas fa-envelope mr-2 text-walnut-500"></i><a href="mailto:luisomorgado4@gmail.com" class="font-semibold">luisomorgado4@gmail.com</a></p>
         <p><i class="fas fa-map-marker-alt mr-2 text-walnut-500"></i>Serving New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale &amp; Pelham, NY</p>
       </div>
       <button id="contact-chat-btn" class="mt-8 bg-walnut-500 hover:bg-walnut-600 text-white font-semibold px-8 py-4 rounded-lg transition">

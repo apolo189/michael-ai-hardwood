@@ -21,7 +21,7 @@ const BUSINESS = {
   company: 'Westchester Hardwood Experts',
   phone: '+19143162170',
   phoneDisplay: '(914) 316-2170',
-  email: 'info@westchesterhardwoodexperts.com',
+  email: 'luisomorgado4@gmail.com',
   website: 'https://westchesternyhardwoodfloors.com',
   websiteDisplay: 'westchesternyhardwoodfloors.com'
 }

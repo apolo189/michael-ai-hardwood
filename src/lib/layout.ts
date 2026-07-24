@@ -99,7 +99,7 @@ export function pageShell(opts: { title: string; description: string; bodyConten
         <h4 class="text-white font-semibold mb-3">Contact</h4>
         <ul class="text-sm space-y-2 text-walnut-300">
           <li><i class="fas fa-phone mr-2"></i><a href="tel:+19143162170" class="hover:text-white">(914) 316-2170</a></li>
-          <li><i class="fas fa-envelope mr-2"></i><a href="mailto:info@westchesterhardwoodexperts.com" class="hover:text-white">info@westchesterhardwoodexperts.com</a></li>
+          <li><i class="fas fa-envelope mr-2"></i><a href="mailto:luisomorgado4@gmail.com" class="hover:text-white">luisomorgado4@gmail.com</a></li>
           <li><i class="fas fa-map-marker-alt mr-2"></i>Serving New Rochelle, Larchmont, Mamaroneck, Rye, Scarsdale &amp; Pelham, NY</li>
         </ul>
       </div>
