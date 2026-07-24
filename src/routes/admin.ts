@@ -34,6 +34,12 @@ function loginPage(error?: string) {
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Michael AI — Admin Login</title>
+      <link rel="manifest" href="/static/manifest.json">
+      <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32.png">
+      <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+      <meta name="apple-mobile-web-app-capable" content="yes">
+      <meta name="apple-mobile-web-app-title" content="Site Visits">
+      <meta name="theme-color" content="#d97706">
       <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
