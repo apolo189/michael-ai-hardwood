@@ -23,7 +23,15 @@ const BUSINESS = {
   phoneDisplay: '(914) 316-2170',
   email: 'luisomorgado4@gmail.com',
   website: 'https://westchesternyhardwoodfloors.com',
-  websiteDisplay: 'westchesternyhardwoodfloors.com'
+  websiteDisplay: 'westchesternyhardwoodfloors.com',
+  cardUrl: 'https://westchesternyhardwoodfloors.com/tarjeta'
+}
+
+// Free QR-code image API (no dependency, no image-generation credits used).
+// The QR simply encodes the card's own URL so anyone can scan it with a
+// phone camera and instantly open this digital business card.
+function qrCodeUrl(data: string, size = 300) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&margin=8&color=3d2814&bgcolor=ffffff&data=${encodeURIComponent(data)}`
 }
 
 function renderCardPage() {
@@ -100,6 +108,13 @@ function renderCardPage() {
           Save My Contact
         </span>
       </a>
+    </div>
+
+    <!-- QR code — scan to open this same digital card on another phone -->
+    <div class="bg-white/95 rounded-2xl shadow-lg p-5 mt-6 flex flex-col items-center">
+      <img src="${qrCodeUrl(BUSINESS.cardUrl)}" alt="QR code to open this digital business card" width="180" height="180" class="rounded-lg">
+      <p class="text-[#3d2814] text-sm font-semibold mt-3 text-center">Scan to share this card</p>
+      <p class="text-gray-500 text-xs text-center mt-0.5">${BUSINESS.websiteDisplay}/tarjeta</p>
     </div>
 
     <p class="text-center text-white/40 text-xs mt-8">Premium Hardwood Flooring Specialists · Westchester County, NY</p>
