@@ -4,13 +4,16 @@
 // left to the LLM to "calculate" — guarantees accuracy and
 // consistency with the business rules defined by the client.
 //
-// PRICING RULES (confirmed by client, updated 2026-07-20):
-// - Natural Look (always 3 coats: 1 sealer + 2 finish)  = $3.50/sq ft
+// PRICING RULES (confirmed by client, updated 2026-07-24):
+// - Natural Look (always 3 coats: 1 sealer + 2 finish)  = $3.00/sq ft (updated 2026-07-24, was $3.50 — market test)
 // - Custom Stain + 2 coats finish                        = $3.50/sq ft
 // - Custom Stain + 3 coats finish                         = $4.00/sq ft
 // - Red Oak Installation 2 1/4" (labor only)               = $3.75/sq ft
 // - Prefinished Hardwood Installation (labor only)         = $3.50/sq ft (updated 2026-07-21, was $2.75)
 // - Pergo / Laminate Installation (labor only)             = $3.00/sq ft
+// - Red Oak Installation + Sanding & Refinishing, 3 coats
+//   (bundled: new install + full sand/refinish, labor only,
+//   material for the new hardwood is separate)              = $6.50/sq ft (added 2026-07-24)
 // - MINIMUM PROJECT SIZE (confirmed by client, added 2026-07-21): any
 //   project under 500 sq ft is billed as if it were 500 sq ft. Small jobs
 //   cost nearly as much in travel/prep/materials as a 500 sq ft job, so a
@@ -30,6 +33,7 @@ export type ServiceKey =
   | 'hardwood_install'
   | 'prefinished_install'
   | 'laminate_install'
+  | 'redoak_install_and_refinish'
 
 export type FinishCoats = 2 | 3
 
@@ -87,13 +91,27 @@ export const SERVICES: Record<ServiceKey, ServiceDefinition> = {
     description:
       'Installation of Pergo or laminate flooring. Labor only — material cost is separate and depends on the product you choose.',
     hasFinishCoatChoice: false
+  },
+  redoak_install_and_refinish: {
+    key: 'redoak_install_and_refinish',
+    label: 'Red Oak Installation + Sanding & Refinishing (3 Coats)',
+    laborOnly: true,
+    includes: [
+      'Professional installation labor (Red Oak 2 1/4")',
+      'Complete sanding after installation',
+      'One coat sealer',
+      'Two coats oil-based finish (3 coats total protection)'
+    ],
+    description:
+      'A complete package: brand-new Red Oak 2 1/4" hardwood installed, then fully sanded and finished with 3 coats for a flawless, ready-to-enjoy floor. Labor only — material for the new hardwood is separate.',
+    hasFinishCoatChoice: false
   }
 }
 
 function basePricePerSqFt(service: ServiceKey, finishCoats?: FinishCoats): number {
   switch (service) {
     case 'sanding_refinishing_natural':
-      return 3.5 // always 3 coats total, no surcharge tiering
+      return 3.0 // always 3 coats total, no surcharge tiering (updated 2026-07-24, was 3.5)
     case 'sanding_refinishing_stain':
       return finishCoats === 3 ? 4.0 : 3.5
     case 'hardwood_install':
@@ -102,6 +120,8 @@ function basePricePerSqFt(service: ServiceKey, finishCoats?: FinishCoats): numbe
       return 3.5
     case 'laminate_install':
       return 3.0
+    case 'redoak_install_and_refinish':
+      return 6.5
     default:
       throw new Error('Unknown service type')
   }

@@ -17,7 +17,7 @@
   const THINKING_DELAY_MS = 5000 // minimum "thinking" pause before Michael replies
 
   const wizard = {
-    service: null, // 'sanding_refinishing_natural' | 'sanding_refinishing_stain' | 'hardwood_install' | 'prefinished_install' | 'laminate_install' | 'repair'
+    service: null, // 'sanding_refinishing_natural' | 'sanding_refinishing_stain' | 'hardwood_install' | 'prefinished_install' | 'laminate_install' | 'redoak_install_and_refinish' | 'repair'
     serviceLabel: null,
     isRepair: false,
     finishCoats: null, // 2 | 3 (only for stain)
@@ -238,11 +238,13 @@
         ${wireBtn('install-redoak', actionButton('Red Oak Installation 2 1/4"', 'fa-hammer'))}
         ${wireBtn('install-prefinished', actionButton('Prefinished Hardwood Installation', 'fa-layer-group'))}
         ${wireBtn('install-laminate', actionButton('Pergo / Laminate Installation', 'fa-th-large'))}
+        ${wireBtn('install-redoak-refinish', actionButton('Red Oak Install + Sanding & Refinishing (3 Coats)', 'fa-star'))}
       </div>
     `)
     bindClick('install-redoak', () => selectService('hardwood_install', 'Red Oak Installation 2 1/4"'))
     bindClick('install-prefinished', () => selectService('prefinished_install', 'Prefinished Hardwood Installation'))
     bindClick('install-laminate', () => selectService('laminate_install', 'Pergo / Laminate Installation'))
+    bindClick('install-redoak-refinish', () => selectService('redoak_install_and_refinish', 'Red Oak Installation + Sanding & Refinishing (3 Coats)'))
   }
 
   function selectService(key, label) {
@@ -269,7 +271,8 @@
         sanding_refinishing_natural: "Great choice. Sanding & refinishing is one of our most requested services — it can completely transform a tired floor.",
         hardwood_install: "Red oak is a timeless choice that holds up beautifully for decades.",
         prefinished_install: "Prefinished hardwood is a great option — durable, and ready to enjoy right after installation.",
-        laminate_install: "Laminate is a smart, budget-friendly way to get the hardwood look."
+        laminate_install: "Laminate is a smart, budget-friendly way to get the hardwood look.",
+        redoak_install_and_refinish: "That's our full premium package — brand-new Red Oak installed and finished from scratch. It's a fantastic way to get a completely flawless floor."
       }
       ackThenAsk(
         (niceties[key] || "Perfect, that helps me understand the scope.") + " Now let's estimate the size of your project.",
@@ -468,7 +471,8 @@
             sanding_refinishing_stain: 'a custom stain refinish',
             hardwood_install: 'a new hardwood installation',
             prefinished_install: 'a new hardwood installation',
-            laminate_install: 'a new laminate installation'
+            laminate_install: 'a new laminate installation',
+            redoak_install_and_refinish: 'a full new hardwood installation with sanding & refinishing'
           }[wizard.service] || 'this project'
           addAssistantMessage(`Based on what you've shared, your floors appear to be a great candidate for ${fitPhrase}.`)
         }
@@ -739,13 +743,12 @@ ${payload.conversationSummary || 'N/A'}
       if (res.data && res.data.success) {
         // 2. Fire the Google Ads conversion event now that the lead is confirmed saved.
         //    Guarded so a missing/blocked gtag (ad blockers, etc.) never breaks the flow.
-        if (typeof window.gtag === 'function') {
-          window.gtag('event', 'conversion', { send_to: 'AW-18326378981/m7o5CNr3y9QcEOWz2aJE' })
+        if (typeof window.gtag === 'func5CNr3y9QcEOWz2aJE' })
         }
 
         // 3. Send the email notification directly from the browser via Web3Forms.
         //    Web3Forms' free plan requires client-side calls (their server-side
-        //    API needs a paid plan + IP whitelisting), so we fire this from here
+        //    API needs a paid plan + IP whitelisting), soplan + IP whitelisting), so we fire this from here
         //    instead of relying on the backend. Best-effort: if it fails, the
         //    lead is still safely stored in our database above.
         sendWeb3FormsNotification(payload).catch((e) => console.warn('Web3Forms notify failed:', e))
@@ -819,5 +822,8 @@ ${payload.conversationSummary || 'N/A'}
   }
 
   window.openMichaelChat = openChat
+  document.addEventListener('DOMContentLoaded', renderRoot)
+})()
+aelChat = openChat
   document.addEventListener('DOMContentLoaded', renderRoot)
 })()
