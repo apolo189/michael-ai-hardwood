@@ -108,6 +108,14 @@ function renderCardPage() {
           Save My Contact
         </span>
       </a>
+
+      <button id="share-card-btn" type="button" class="w-full flex items-center gap-3 bg-white/95 hover:bg-white text-[#3d2814] font-semibold px-5 py-3.5 rounded-xl transition shadow-lg">
+        <span class="w-9 h-9 rounded-full bg-[#3d2814] text-[#d4af6a] flex items-center justify-center flex-shrink-0"><i class="fas fa-share-nodes"></i></span>
+        <span class="text-left">
+          <span class="block text-xs text-gray-500 font-normal">Enviar a un cliente</span>
+          <span id="share-card-label">Compartir mi tarjeta</span>
+        </span>
+      </button>
     </div>
 
     <!-- QR code — scan to open this same digital card on another phone -->
@@ -123,6 +131,46 @@ function renderCardPage() {
 
     <p class="text-center text-white/40 text-xs mt-4">Premium Hardwood Flooring Specialists · Westchester County, NY</p>
   </div>
+
+  <script>
+    // "Compartir mi tarjeta" — uses the phone's native share sheet (same
+    // one used to share a photo or link) so Luis can send the card to
+    // ANY contact right there in the moment, saved or not. On devices/
+    // browsers without native share support (mostly desktop), falls back
+    // to copying the link so it can be pasted anywhere.
+    (function () {
+      var btn = document.getElementById('share-card-btn');
+      var label = document.getElementById('share-card-label');
+      if (!btn) return;
+
+      var shareData = {
+        title: '${BUSINESS.name} — ${BUSINESS.company}',
+        text: 'Aquí está mi tarjeta digital:',
+        url: '${BUSINESS.cardUrl}'
+      };
+
+      btn.addEventListener('click', async function () {
+        if (navigator.share) {
+          try {
+            await navigator.share(shareData);
+          } catch (err) {
+            // User cancelled the share sheet — do nothing.
+          }
+        } else if (navigator.clipboard) {
+          try {
+            await navigator.clipboard.writeText(shareData.url);
+            var original = label.textContent;
+            label.textContent = 'Link copiado ✓ Pégalo donde quieras';
+            setTimeout(function () { label.textContent = original; }, 2500);
+          } catch (err) {
+            window.prompt('Copia este link:', shareData.url);
+          }
+        } else {
+          window.prompt('Copia este link:', shareData.url);
+        }
+      });
+    })();
+  </script>
 </body>
 </html>`
 }
