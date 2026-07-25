@@ -71,6 +71,9 @@ export function adminNav(active: 'leads' | 'visits') {
       <a href="/admin/visits" class="px-4 py-2 rounded text-sm font-semibold ${active === 'visits' ? 'bg-amber-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}">
         <i class="fas fa-clipboard-list mr-1"></i> Site Visits
       </a>
+      <a href="/hub" class="px-4 py-2 rounded text-sm font-semibold bg-white text-gray-600 hover:bg-gray-50 ml-auto">
+        <i class="fas fa-grip mr-1"></i> Panel Principal
+      </a>
     </nav>
   `
 }

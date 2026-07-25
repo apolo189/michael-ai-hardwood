@@ -8,6 +8,7 @@ import admin from './routes/admin'
 import visits from './routes/visits'
 import share from './routes/share'
 import card from './routes/card'
+import hub from './routes/hub'
 
 type Bindings = {
   DB: D1Database
@@ -43,6 +44,11 @@ app.route('/share', share)
 // Digital business card (single shareable page, no login) — see src/routes/card.ts
 app.route('/tarjeta', card)
 app.route('/card', card)
+
+// Central hub — one page linking to every tool (card, admin panels, site,
+// GitHub). No login itself; each admin link still requires its own password.
+// See src/routes/hub.ts
+app.route('/hub', hub)
 
 // Pages (landing page, legal pages, etc.)
 app.route('/', pages)

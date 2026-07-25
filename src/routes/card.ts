@@ -117,7 +117,11 @@ function renderCardPage() {
       <p class="text-gray-500 text-xs text-center mt-0.5">${BUSINESS.websiteDisplay}/tarjeta</p>
     </div>
 
-    <p class="text-center text-white/40 text-xs mt-8">Premium Hardwood Flooring Specialists · Westchester County, NY</p>
+    <a href="/hub" class="block text-center text-[#d4af6a]/70 hover:text-[#d4af6a] text-xs mt-6 underline">
+      <i class="fas fa-grip mr-1"></i> Panel Principal (todas mis herramientas)
+    </a>
+
+    <p class="text-center text-white/40 text-xs mt-4">Premium Hardwood Flooring Specialists · Westchester County, NY</p>
   </div>
 </body>
 </html>`
