@@ -613,7 +613,10 @@ visits.get('/:id', async (c) => {
 
   const shareUrl = `${new URL(c.req.url).origin}/share/visit/${visit.share_token}`
 
-  const body = detailPageBody(visit, rooms || [], photos || [], shareUrl, true)
+  const latestContract = await env.DB.prepare('SELECT * FROM contracts WHERE visit_id = ? ORDER BY id DESC LIMIT 1').bind(id).first() as any
+  const contractUrl = latestContract ? `${new URL(c.req.url).origin}/firmar/${latestContract.contract_token}` : ''
+
+  const body = detailPageBody(visit, rooms || [], photos || [], shareUrl, true, latestContract, contractUrl)
   return c.html(pageShell(`Visit — ${visit.client_name || ''} — Michael AI`, body, `
     <style>
       @media (max-width: 768px) { .photo-grid { grid-template-columns: repeat(2, 1fr) !important; } }
@@ -621,7 +624,7 @@ visits.get('/:id', async (c) => {
   `))
 })
 
-function detailPageBody(visit: any, rooms: any[], photos: any[], shareUrl: string, isAdminView: boolean) {
+function detailPageBody(visit: any, rooms: any[], photos: any[], shareUrl: string, isAdminView: boolean, latestContract: any = null, contractUrl: string = '') {
   let services: string[] = []
   try { services = JSON.parse(visit.services_json || '[]') } catch {}
   const serviceLabels = services.map((s) => SERVICE_OPTIONS[s] || s).join(', ') || '—'
@@ -671,6 +674,34 @@ function detailPageBody(visit: any, rooms: any[], photos: any[], shareUrl: strin
         <button onclick="navigator.clipboard.writeText('${shareUrl}').then(()=>{this.textContent='Copied!'; setTimeout(()=>this.innerHTML='<i class=\\'fas fa-copy mr-1\\'></i> Copy Link',1500)})" class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-4 py-2 rounded whitespace-nowrap">
           <i class="fas fa-copy mr-1"></i> Copy Link
         </button>
+      </div>
+
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <p class="text-sm font-semibold text-blue-800 mb-2"><i class="fas fa-file-signature mr-1"></i> Send Contract to Sign (electronic signature)</p>
+        ${latestContract && latestContract.status === 'signed' ? `
+          <p class="text-xs text-green-700 mb-2"><i class="fas fa-circle-check mr-1"></i> Signed by ${escapeHtml(latestContract.signer_name || '')} on ${escapeHtml((latestContract.signed_at || '').slice(0, 16).replace('T', ' '))}</p>
+          <div class="flex items-center gap-2 flex-wrap">
+            <p class="text-xs text-blue-700 break-all flex-1">${contractUrl}</p>
+            <button onclick="navigator.clipboard.writeText('${contractUrl}').then(()=>{this.textContent='Copied!'; setTimeout(()=>this.innerHTML='<i class=\\'fas fa-copy mr-1\\'></i> Copy Link',1500)})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded whitespace-nowrap"><i class="fas fa-copy mr-1"></i> Copy Link</button>
+          </div>
+        ` : latestContract ? `
+          <p class="text-xs text-blue-700 mb-2">Waiting for client's signature — send this link so they can sign on their phone:</p>
+          <div class="flex items-center gap-2 flex-wrap">
+            <p class="text-xs text-blue-700 break-all flex-1">${contractUrl}</p>
+            <button onclick="navigator.clipboard.writeText('${contractUrl}').then(()=>{this.textContent='Copied!'; setTimeout(()=>this.innerHTML='<i class=\\'fas fa-copy mr-1\\'></i> Copy Link',1500)})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded whitespace-nowrap"><i class="fas fa-copy mr-1"></i> Copy Link</button>
+          </div>
+          <form method="POST" action="/admin/visits/${visit.id}/contract" class="mt-2">
+            <input type="hidden" name="deposit_percent" value="30">
+            <button type="submit" class="text-xs text-blue-600 underline">Generate a new link instead</button>
+          </form>
+        ` : `
+          <p class="text-xs text-blue-700 mb-3">Creates a private link with the price, scope of work, and terms below, ready for the client to sign with their finger on their phone. Requires a Final Price (or Quoted Estimate) to be set below first.</p>
+          <form method="POST" action="/admin/visits/${visit.id}/contract" class="flex items-center gap-2 flex-wrap">
+            <label class="text-xs text-blue-700">Deposit %:</label>
+            <input type="number" name="deposit_percent" value="30" min="0" max="100" class="w-16 border border-blue-300 rounded px-2 py-1 text-sm">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded"><i class="fas fa-paper-plane mr-1"></i> Create Signable Contract</button>
+          </form>
+        `}
       </div>
     ` : ''}
 

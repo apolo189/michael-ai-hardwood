@@ -9,6 +9,7 @@ import visits from './routes/visits'
 import share from './routes/share'
 import card from './routes/card'
 import hub from './routes/hub'
+import { contractAdmin, contractPublic } from './routes/contract'
 
 type Bindings = {
   DB: D1Database
@@ -36,6 +37,13 @@ app.route('/admin', admin)
 // Site visit notes (measurements + photos), password-protected — see
 // src/routes/visits.ts. Also isolated from the booking form / email flow.
 app.route('/admin/visits', visits)
+
+// Electronic signature contracts, generated from a Site Visit — create
+// route is password-protected (mounted alongside /admin/visits), the
+// signing page itself is public/no-login (mounted at /firmar) — see
+// src/routes/contract.ts
+app.route('/admin/visits', contractAdmin)
+app.route('/firmar', contractPublic)
 
 // Public, no-login, read-only share page for a single visit (WhatsApp link
 // to subcontractor) — scoped by an unguessable share_token, see src/routes/share.ts.
