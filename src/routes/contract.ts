@@ -222,8 +222,8 @@ function signingPageBody(row: any, token: string) {
       <input id="signerName" type="text" placeholder="Type your full name" class="w-full border border-gray-300 rounded-lg px-3 py-2.5 mb-4 text-base" autocomplete="name">
 
       <label class="block text-xs text-gray-500 mb-1">Sign with your finger below</label>
-      <div class="border-2 border-dashed border-gray-300 rounded-lg overflow-hidden bg-gray-50 relative">
-        <canvas id="sigPad" class="w-full touch-none" style="height:180px; display:block;"></canvas>
+      <div class="border-2 border-dashed border-gray-300 rounded-lg overflow-hidden bg-white relative">
+        <canvas id="sigPad" style="height:180px; display:block; width:100%; touch-action:none;"></canvas>
         <button id="clearSig" type="button" class="absolute top-2 right-2 text-xs bg-white border border-gray-300 rounded px-2 py-1 text-gray-500"><i class="fas fa-eraser mr-1"></i>Clear</button>
       </div>
 
@@ -240,55 +240,102 @@ function signingPageBody(row: any, token: string) {
     (function () {
       var canvas = document.getElementById('sigPad');
       var ctx = canvas.getContext('2d');
-      var drawing = false, hasSignature = false;
+      var drawing = false;
       var lastX = 0, lastY = 0;
+      // Store every stroke as an array of points (in CSS pixels, not device
+      // pixels) so the drawing can be redrawn if the canvas is ever resized
+      // (e.g. mobile browser hides/shows its address bar on scroll, or the
+      // on-screen keyboard opens/closes) — this was previously WIPING the
+      // signature silently because the canvas backing store was recreated
+      // on every 'resize' event without redrawing what was already drawn,
+      // which is why the line looked faint/cut-off and sometimes the
+      // signature that got submitted was blank.
+      var strokes = [];
+      var currentStroke = null;
 
-      function resize() {
+      function sizeCanvas() {
         var ratio = window.devicePixelRatio || 1;
         var rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * ratio;
-        canvas.height = rect.height * ratio;
-        ctx.scale(ratio, ratio);
-        ctx.lineWidth = 2.5;
+        var cssWidth = rect.width;
+        var cssHeight = rect.height;
+        canvas.width = Math.round(cssWidth * ratio);
+        canvas.height = Math.round(cssHeight * ratio);
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.lineWidth = 3;
         ctx.lineCap = 'round';
-        ctx.strokeStyle = '#1f2937';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#000000';
+        redrawAll();
       }
-      resize();
-      window.addEventListener('resize', resize);
+
+      function redrawAll() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var s = 0; s < strokes.length; s++) {
+          var pts = strokes[s];
+          if (pts.length < 2) continue;
+          ctx.beginPath();
+          ctx.moveTo(pts[0].x, pts[0].y);
+          for (var i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+          ctx.stroke();
+        }
+      }
+
+      sizeCanvas();
+      // Debounced resize handler — mobile browsers fire many resize/scroll
+      // events; redrawing is cheap but we still avoid doing it excessively.
+      var resizeTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(sizeCanvas, 150);
+      });
 
       function pos(e) {
         var rect = canvas.getBoundingClientRect();
-        var t = e.touches ? e.touches[0] : e;
+        var t = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
         return { x: t.clientX - rect.left, y: t.clientY - rect.top };
       }
-      function start(e) { drawing = true; var p = pos(e); lastX = p.x; lastY = p.y; e.preventDefault(); }
+      function start(e) {
+        drawing = true;
+        var p = pos(e);
+        lastX = p.x; lastY = p.y;
+        currentStroke = [p];
+        strokes.push(currentStroke);
+        e.preventDefault();
+      }
       function move(e) {
         if (!drawing) return;
         var p = pos(e);
         ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y); ctx.stroke();
-        lastX = p.x; lastY = p.y; hasSignature = true;
+        lastX = p.x; lastY = p.y;
+        currentStroke.push(p);
         updateBtn();
         e.preventDefault();
       }
-      function end() { drawing = false; }
+      function end(e) { drawing = false; currentStroke = null; if (e) e.preventDefault(); }
 
       canvas.addEventListener('mousedown', start);
       canvas.addEventListener('mousemove', move);
       canvas.addEventListener('mouseup', end);
       canvas.addEventListener('touchstart', start, { passive: false });
       canvas.addEventListener('touchmove', move, { passive: false });
-      canvas.addEventListener('touchend', end);
+      canvas.addEventListener('touchend', end, { passive: false });
+      canvas.addEventListener('touchcancel', end, { passive: false });
 
       document.getElementById('clearSig').addEventListener('click', function () {
+        strokes = [];
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        hasSignature = false;
         updateBtn();
       });
+
+      function hasSignature() {
+        for (var i = 0; i < strokes.length; i++) if (strokes[i].length > 1) return true;
+        return false;
+      }
 
       var nameInput = document.getElementById('signerName');
       var submitBtn = document.getElementById('submitBtn');
       function updateBtn() {
-        var ok = hasSignature && nameInput.value.trim().length > 1;
+        var ok = hasSignature() && nameInput.value.trim().length > 1;
         submitBtn.disabled = !ok;
         submitBtn.className = ok
           ? 'w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl mt-4 transition'
@@ -299,6 +346,11 @@ function signingPageBody(row: any, token: string) {
       submitBtn.addEventListener('click', async function () {
         var errMsg = document.getElementById('errMsg');
         errMsg.classList.add('hidden');
+        if (!hasSignature()) {
+          errMsg.textContent = 'Please draw your signature above before submitting.';
+          errMsg.classList.remove('hidden');
+          return;
+        }
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
         try {
@@ -307,14 +359,15 @@ function signingPageBody(row: any, token: string) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ signerName: nameInput.value.trim(), signatureData: canvas.toDataURL('image/png') })
           });
-          var data = await res.json();
-          if (!res.ok || !data.success) throw new Error(data.error || 'submit_failed');
+          var data = await res.json().catch(function () { return {}; });
+          if (!res.ok || !data.success) throw new Error((data && data.error) || ('http_' + res.status));
           window.location.reload();
         } catch (err) {
-          errMsg.textContent = 'Something went wrong. Please check your connection and try again.';
+          errMsg.textContent = 'Something went wrong sending your signature. Please check your internet connection and try again.';
           errMsg.classList.remove('hidden');
           submitBtn.disabled = false;
           submitBtn.textContent = 'Confirm & Sign';
+          updateBtn();
         }
       });
     })();
