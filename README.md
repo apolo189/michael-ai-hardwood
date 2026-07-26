@@ -1,4 +1,13 @@
-# Michael AI — Hardwood Flooring Sales Specialist (MVP v2.9 — Site Visit Notes + Photos + Subcontractor Share Links)
+# Michael AI — Hardwood Flooring Sales Specialist (MVP v3.0 — Electronic Signature Contracts)
+
+## What's New in v3.0 (Send & Sign Contracts Electronically, On the Spot)
+- **New feature: electronic signature contracts, generated directly from a Site Visit.** After quoting a client in person, Luis opens the visit's detail page (`/admin/visits/:id`) and taps **"Create Signable Contract"** (sets a deposit %, default 30%) — this creates a frozen snapshot (client info, services, sq ft, total price, deposit amount, target start date, and standard terms) so later edits to the visit never change an already-sent contract.
+- **Client-facing signing page: `/firmar/:token`** — public, no login required, scoped by an unguessable random token (same security pattern as the existing subcontractor share links). Shows the full estimate summary, deposit amount, and terms, then the client signs with a finger/mouse on an HTML5 `<canvas>` signature pad and taps "Confirm & Sign". Mobile-friendly — designed to be handed to the client on Luis's own phone right after the walkthrough, or sent via WhatsApp/text if he's already left.
+- **Proof of acceptance stored server-side (new `contracts` table, D1)**: signer's typed full name, the signature drawing (PNG), timestamp, and the request's IP address. A contract can only be signed once — a second signing attempt is rejected (`409 already_signed`).
+- **Luis sees live status on the visit page**: "Waiting for signature" (with the link to copy/resend) or "✅ Signed by [Name] on [date]" once complete.
+- **After signing**, the client sees a confirmation screen with a **"Send me a copy by email"** button — since Web3Forms' free plan can't auto-email arbitrary third parties from the server, this opens the client's own mail app pre-filled with the signed terms so they can send themselves a copy in one tap. (Luis can upgrade this to a fully automatic email later with a free Resend account if wanted.)
+- **Legal note (not legal advice)**: a simple finger-signature + name + timestamp + IP is generally considered valid for service contracts under the US federal ESIGN Act, but Luis should have an actual lawyer confirm the exact terms wording for his contracts before relying on this for large jobs.
+- **Fully isolated**: new `contracts` table (migration `0004_signable_contracts.sql`) only reads from `site_visits` to build the snapshot; never writes back to it. New route file `src/routes/contract.ts`, mounted as two separate routers — `contractAdmin` (password-protected, under `/admin/visits`) and `contractPublic` (no login, under `/firmar`). Booking form, chat widget, and lead-notification flow were not touched.
 
 ## Project Overview
 - **Name**: Westchester Hardwood Experts — powered by Michael AI
