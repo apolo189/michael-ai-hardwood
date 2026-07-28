@@ -49,7 +49,7 @@ const DEFAULT_TERMS = `1. This estimate becomes a binding work agreement once si
 5. Cancellations within 48 hours of the scheduled start date may forfeit the deposit to cover reserved materials/labor.
 By signing below, the client confirms they have reviewed and agree to the price, scope of work, and terms above, and authorize Westchester Hardwood Experts to proceed.`
 
-function pageShell(title: string, body: string) {
+function pageShell(title: string, body: string, web3formsKey: string = '') {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,6 +61,7 @@ function pageShell(title: string, body: string) {
 </head>
 <body class="bg-gray-50 min-h-screen">
   ${body}
+  <script>window.__WEB3FORMS_ACCESS_KEY = ${JSON.stringify(web3formsKey || '')};</script>
 </body>
 </html>`
 }
@@ -134,7 +135,15 @@ contractPublic.get('/:token', async (c) => {
   if (!row) return c.html(pageShell('Link Not Found', `<div class="max-w-md mx-auto mt-24 text-center px-4"><i class="fas fa-triangle-exclamation text-4xl text-amber-500 mb-4"></i><p class="text-gray-600">This contract link is invalid or has expired. Please contact Westchester Hardwood Experts for a new link.</p></div>`), 404)
 
   if (row.status === 'signed') {
-    return c.html(pageShell('Signed — Westchester Hardwood Experts', signedConfirmationBody(row)))
+    // The `just_signed=1` query param is only present on the ONE-TIME
+    // redirect that immediately follows a successful signature submission
+    // (see the fetch() success handler in signingPageBody below) — it's how
+    // we notify Luis exactly once, from the client's own browser, using the
+    // same Web3Forms mechanism already used for new-lead notifications.
+    // Re-opening this same /firmar/:token link later (already signed) never
+    // includes this param, so it never re-sends the notification.
+    const justSigned = c.req.query('just_signed') === '1'
+    return c.html(pageShell('Signed — Westchester Hardwood Experts', signedConfirmationBody(row, justSigned), env.WEB3FORMS_ACCESS_KEY))
   }
 
   return c.html(pageShell(`Estimate for ${row.client_name || 'Review'} — Westchester Hardwood Experts`, signingPageBody(row, token)))
@@ -361,7 +370,9 @@ function signingPageBody(row: any, token: string) {
           });
           var data = await res.json().catch(function () { return {}; });
           if (!res.ok || !data.success) throw new Error((data && data.error) || ('http_' + res.status));
-          window.location.reload();
+          // just_signed=1 tells the confirmation page (reloaded below) to
+          // notify Luis this ONE time via the client's own browser.
+          window.location.href = window.location.pathname + '?just_signed=1';
         } catch (err) {
           errMsg.textContent = 'Something went wrong sending your signature. Please check your internet connection and try again.';
           errMsg.classList.remove('hidden');
@@ -375,11 +386,30 @@ function signingPageBody(row: any, token: string) {
   `
 }
 
-function signedConfirmationBody(row: any) {
+function signedConfirmationBody(row: any, justSigned: boolean = false) {
   const emailSubject = encodeURIComponent('Signed Estimate — Westchester Hardwood Experts')
   const emailBody = encodeURIComponent(
     `Signed estimate confirmation\n\nClient: ${row.client_name || ''}\nAddress: ${row.address || ''} ${row.city || ''}\nService(s): ${row.services_text || ''}\nTotal Price: ${money(row.total_price)}\nDeposit (${row.deposit_percent}%): ${money(row.deposit_amount)}\nEstimated Start: ${row.target_start_date || 'To be scheduled'}\nSigned by: ${row.signer_name || ''}\nSigned at: ${row.signed_at || ''}\n\nTerms:\n${row.terms_text || ''}`
   )
+
+  // Data used ONLY by the one-time notify script below (never rendered as
+  // visible text) — kept as a separate JSON blob so we don't have to worry
+  // about escaping inside a JS template literal.
+  const notifyPayload = JSON.stringify({
+    clientName: row.client_name || '',
+    address: row.address || '',
+    city: row.city || '',
+    phone: row.phone || '',
+    email: row.email || '',
+    services: row.services_text || '',
+    totalPrice: row.total_price,
+    depositPercent: row.deposit_percent,
+    depositAmount: row.deposit_amount,
+    startDate: row.target_start_date || '',
+    signerName: row.signer_name || '',
+    signedAt: row.signed_at || ''
+  })
+
   return `
   <div class="max-w-lg mx-auto px-4 py-10 text-center">
     <i class="fas fa-circle-check text-green-500 text-5xl mb-4"></i>
@@ -399,6 +429,58 @@ function signedConfirmationBody(row: any) {
       <i class="fas fa-envelope"></i> Send me a copy by email
     </a>
   </div>
+
+  ${justSigned ? `
+  <script>
+    // Fire-and-forget: notify Luis using the SAME mechanism already used
+    // for new-lead emails (Web3Forms free plan — client-side only, no
+    // server email account needed). Runs ONCE, only right after a
+    // successful signature (see just_signed=1 handling), never again if
+    // this page is reopened later.
+    (function () {
+      var accessKey = window.__WEB3FORMS_ACCESS_KEY;
+      if (!accessKey) return;
+      var d = ${notifyPayload};
+      var message = [
+        'CONTRACT SIGNED — ' + (d.clientName || 'Client'),
+        '',
+        'Client: ' + (d.clientName || 'N/A'),
+        'Phone: ' + (d.phone || 'N/A'),
+        'Email: ' + (d.email || 'N/A'),
+        'Address: ' + (d.address || 'N/A') + ' ' + (d.city || ''),
+        '',
+        'Service(s): ' + (d.services || 'N/A'),
+        'Total Price: ' + (d.totalPrice != null ? '$' + d.totalPrice : 'N/A'),
+        'Deposit (' + d.depositPercent + '%): ' + (d.depositAmount != null ? '$' + d.depositAmount : 'N/A'),
+        'Estimated Start: ' + (d.startDate || 'To be scheduled'),
+        '',
+        'Signed by: ' + (d.signerName || 'N/A'),
+        'Signed at: ' + (d.signedAt || 'N/A')
+      ].join('\\n');
+
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+          access_key: accessKey,
+          subject: '✅ CONTRACT SIGNED — ' + (d.clientName || 'Client'),
+          from_name: 'Michael AI - Signed Contract Notification',
+          name: d.clientName || 'Client',
+          email: d.email || 'noreply@michaelai-hardwood.com',
+          phone: d.phone || '',
+          message: message
+        })
+      }).catch(function () {});
+
+      // Clean the URL so refreshing/reopening this page never re-fires
+      // the notification.
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    })();
+  </script>
+  ` : ''}
   `
 }
 
