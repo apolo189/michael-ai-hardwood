@@ -58,10 +58,10 @@ function pageShell(title: string, body: string, web3formsKey: string = '') {
   <title>${escapeHtml(title)}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <script>window.__WEB3FORMS_ACCESS_KEY = ${JSON.stringify(web3formsKey || '')};</script>
 </head>
 <body class="bg-gray-50 min-h-screen">
   ${body}
-  <script>window.__WEB3FORMS_ACCESS_KEY = ${JSON.stringify(web3formsKey || '')};</script>
 </body>
 </html>`
 }
