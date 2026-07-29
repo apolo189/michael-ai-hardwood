@@ -751,12 +751,13 @@ ${payload.conversationSummary || 'N/A'}
       if (res.data && res.data.success) {
         // 2. Fire the Google Ads conversion event now that the lead is confirmed saved.
         //    Guarded so a missing/blocked gtag (ad blockers, etc.) never breaks the flow.
-        if (typeof window.gtag === 'func5CNr3y9QcEOWz2aJE' })
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'conversion', { send_to: 'AW-18326378981/m7o5CNr3y9QcEOWz2aJE' })
         }
 
         // 3. Send the email notification directly from the browser via Web3Forms.
         //    Web3Forms' free plan requires client-side calls (their server-side
-        //    API needs a paid plan + IP whitelisting), soplan + IP whitelisting), so we fire this from here
+        //    API needs a paid plan + IP whitelisting), so we fire this from here
         //    instead of relying on the backend. Best-effort: if it fails, the
         //    lead is still safely stored in our database above.
         sendWeb3FormsNotification(payload).catch((e) => console.warn('Web3Forms notify failed:', e))
@@ -830,8 +831,5 @@ ${payload.conversationSummary || 'N/A'}
   }
 
   window.openMichaelChat = openChat
-  document.addEventListener('DOMContentLoaded', renderRoot)
-})()
-aelChat = openChat
   document.addEventListener('DOMContentLoaded', renderRoot)
 })()
