@@ -28,7 +28,7 @@
     transcript: [] // {role, content} for the lead's conversation summary
   }
 
-  const ROOM_SIZE_SQFT = { Small: 120, Medium: 200, Large: 300 }
+  const ROOM_TYPE_OPTIONS = ['Living Room', 'Bedroom', 'Kitchen', 'Dining Room', 'Hallway', 'Family Room', 'Bathroom', 'Office', 'Basement', 'Other']
   const MINIMUM_PROJECT_SQFT = 500 // must match src/lib/pricing.ts MINIMUM_PROJECT_SQFT
 
   function getSessionId() {
@@ -331,61 +331,83 @@
       addUserMessage("I don't know my square footage")
       clearActions()
       ackThenAsk(
-        "No problem, I can work with that.",
-        'How many rooms are we talking about?',
-        renderRoomsCountStep
+        "No problem — let's measure it room by room instead.",
+        "For each room, pick the room type and enter its length \u00d7 width, and I'll add up the total for you.",
+        renderRoomMeasureStep
       )
     })
   }
 
-  function renderRoomsCountStep() {
-    setActions(`
-      <div id="rooms-options" class="grid grid-cols-4 gap-2">
-        ${['1', '2', '3', '4+'].map((n) => `<button data-rooms="${n}" class="rooms-btn border border-walnut-200 hover:border-walnut-500 hover:bg-walnut-50 text-walnut-800 rounded-lg py-2 text-sm font-medium transition">${n}</button>`).join('')}
+  // --- Room-by-room measurement (type + length x width -> total sq ft) ---
+
+  function renderRoomMeasureStep() {
+    wizard._rooms = wizard._rooms || []
+    renderRoomMeasureUI()
+  }
+
+  function renderRoomMeasureUI() {
+    const rows = wizard._rooms.map((r, i) => `
+      <div class="flex items-center justify-between gap-2 bg-walnut-50 border border-walnut-100 rounded-lg px-2.5 py-1.5 text-xs">
+        <span class="font-medium text-walnut-800 truncate">${escapeHtml(r.type)}</span>
+        <span class="text-walnut-500 whitespace-nowrap">${r.length}\u00d7${r.width} ft</span>
+        <span class="font-semibold text-walnut-700 whitespace-nowrap">${r.sqft} sqft</span>
+        <button type="button" data-remove-room="${i}" class="text-red-400 hover:text-red-600 shrink-0"><i class="fas fa-times"></i></button>
       </div>
+    `).join('')
+
+    const total = wizard._rooms.reduce((sum, r) => sum + r.sqft, 0)
+
+    setActions(`
+      <div id="room-list" class="space-y-1.5 max-h-[130px] overflow-y-auto mb-2 pr-0.5">
+        ${rows || '<p class="text-xs text-walnut-400 italic px-1">No rooms added yet.</p>'}
+      </div>
+      <form id="room-add-form" class="grid grid-cols-3 gap-1.5 mb-2">
+        <select id="room-type-input" required class="col-span-3 border border-walnut-200 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-walnut-300">
+          <option value="">Room type</option>
+          ${ROOM_TYPE_OPTIONS.map((t) => `<option>${t}</option>`).join('')}
+        </select>
+        <input id="room-length-input" type="number" min="0.1" step="0.1" placeholder="Length ft" required
+          class="border border-walnut-200 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-walnut-300">
+        <input id="room-width-input" type="number" min="0.1" step="0.1" placeholder="Width ft" required
+          class="border border-walnut-200 rounded-lg px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-walnut-300">
+        <button type="submit" class="bg-walnut-100 hover:bg-walnut-200 text-walnut-700 rounded-lg text-xs font-semibold flex items-center justify-center"><i class="fas fa-plus"></i></button>
+      </form>
+      <button type="button" id="rooms-done-btn" class="w-full font-semibold py-2.5 rounded-lg text-sm transition ${wizard._rooms.length ? 'bg-walnut-500 hover:bg-walnut-600 text-white' : 'bg-walnut-100 text-walnut-400 pointer-events-none'}">
+        Use This Total${wizard._rooms.length ? ` (${total} sq ft)` : ''}
+      </button>
     `)
-    document.querySelectorAll('.rooms-btn').forEach((btn) => {
-      btn.addEventListener('click', () => selectRoomsCount(btn.getAttribute('data-rooms')))
+
+    const form = document.getElementById('room-add-form')
+    form.addEventListener('submit', (e) => {
+      e.preventDefault()
+      const type = document.getElementById('room-type-input').value
+      const length = Number(document.getElementById('room-length-input').value)
+      const width = Number(document.getElementById('room-width-input').value)
+      if (!type || !length || !width || length <= 0 || width <= 0) return
+      const sqft = Math.round(length * width)
+      wizard._rooms.push({ type, length, width, sqft })
+      renderRoomMeasureUI()
+    })
+
+    document.querySelectorAll('[data-remove-room]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.getAttribute('data-remove-room'))
+        wizard._rooms.splice(idx, 1)
+        renderRoomMeasureUI()
+      })
+    })
+
+    bindClick('rooms-done-btn', () => {
+      if (!wizard._rooms.length) return
+      const totalSqft = wizard._rooms.reduce((sum, r) => sum + r.sqft, 0)
+      const summary = wizard._rooms.map((r) => `${r.type} (${r.length}\u00d7${r.width} ft = ${r.sqft} sq ft)`).join(', ')
+      addUserMessage(summary + ` \u2014 Total: ${totalSqft} sq ft`)
+      clearActions()
+      afterSquareFootage(totalSqft)
     })
   }
 
-  function selectRoomsCount(roomsLabel) {
-    wizard._roomsCount = roomsLabel === '4+' ? 4 : Number(roomsLabel)
-    addUserMessage(roomsLabel + (roomsLabel === '1' ? ' room' : ' rooms'))
-    clearActions()
-    ackThenAsk(
-      "Got it.",
-      'And about how large would you say those rooms are on average?',
-      renderRoomSizeStep
-    )
-  }
-
-  function renderRoomSizeStep() {
-    setActions(`
-      <div id="room-size-options">
-        ${wireBtn('size-small', actionButton('Small (e.g. bedroom)', 'fa-compress'))}
-        ${wireBtn('size-medium', actionButton('Medium (e.g. living room)', 'fa-square'))}
-        ${wireBtn('size-large', actionButton('Large (e.g. open floor plan)', 'fa-expand'))}
-      </div>
-    `)
-    bindClick('size-small', () => selectRoomSize('Small'))
-    bindClick('size-medium', () => selectRoomSize('Medium'))
-    bindClick('size-large', () => selectRoomSize('Large'))
-  }
-
-  function selectRoomSize(size) {
-    addUserMessage(size)
-    clearActions()
-    const estimatedSqft = wizard._roomsCount * ROOM_SIZE_SQFT[size]
-    respondAfterThinking(() => {
-      addAssistantMessage(`Based on that, I'll use approximately ${estimatedSqft} sq ft for your estimate.`)
-      setTimeout(() => {
-        afterSquareFootage(estimatedSqft)
-      }, 500)
-    })
-  }
-
-  // Common continuation after square footage is known (typed or estimated)
+  // Common continuation after square footage is known (typed, room-by-room measured, or estimated)
   function afterSquareFootage(sqft) {
     wizard.squareFootage = sqft
     let sizeNote
