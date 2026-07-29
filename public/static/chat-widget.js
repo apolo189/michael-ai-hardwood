@@ -65,50 +65,58 @@
         <span class="hidden sm:inline">Get My Estimate Now</span>
       </button>
 
-      <div id="michael-chat-panel" class="hidden-state fixed bottom-6 right-6 z-50 w-[92vw] max-w-sm h-[75vh] max-h-[640px] bg-white rounded-2xl shadow-2xl border border-walnut-100 flex flex-col overflow-hidden">
-        <div class="bg-walnut-500 text-white px-4 py-3 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg">
-            <i class="fas fa-user-tie"></i>
+      <div id="chat-overlay" class="hidden-state fixed inset-0 z-50 bg-walnut-900/60 backdrop-blur-sm flex items-center justify-center sm:p-4">
+        <div id="michael-chat-panel" class="w-full h-full sm:w-[92vw] sm:max-w-2xl sm:h-[88vh] sm:max-h-[820px] bg-white sm:rounded-2xl shadow-2xl border border-walnut-100 flex flex-col overflow-hidden">
+          <div class="bg-walnut-500 text-white px-4 py-3 flex items-center gap-3 shrink-0">
+            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-semibold leading-none">Michael AI</p>
+              <p class="text-xs text-walnut-100">Hardwood Flooring Specialist</p>
+            </div>
+            <button id="chat-close-btn" class="text-white/80 hover:text-white text-2xl w-9 h-9 flex items-center justify-center"><i class="fas fa-times"></i></button>
           </div>
-          <div class="flex-1">
-            <p class="font-semibold leading-none">Michael AI</p>
-            <p class="text-xs text-walnut-100">Hardwood Flooring Specialist</p>
-          </div>
-          <button id="chat-close-btn" class="text-white/80 hover:text-white text-lg"><i class="fas fa-times"></i></button>
+
+          <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-6 space-y-3 bg-walnut-50/40"></div>
+
+          <div id="chat-actions" class="px-4 sm:px-8 pb-3 shrink-0"></div>
+
+          <form id="chat-input-form" class="border-t border-walnut-100 p-3 sm:px-8 flex items-center gap-2 bg-white shrink-0">
+            <input id="chat-text-input" type="text" placeholder="Or type a question..." autocomplete="off"
+              class="flex-1 border border-walnut-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-walnut-300">
+            <button type="submit" class="bg-walnut-500 hover:bg-walnut-600 text-white w-10 h-10 rounded-full flex items-center justify-center shrink-0">
+              <i class="fas fa-arrow-up"></i>
+            </button>
+          </form>
+          <p class="text-[10px] text-walnut-400 text-center pb-2 shrink-0">By chatting, you agree to our <a href="/privacy-policy" class="underline">Privacy Policy</a>.</p>
         </div>
-
-        <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-walnut-50/40"></div>
-
-        <div id="chat-actions" class="px-4 pb-3"></div>
-
-        <form id="chat-input-form" class="border-t border-walnut-100 p-3 flex items-center gap-2 bg-white">
-          <input id="chat-text-input" type="text" placeholder="Or type a question..." autocomplete="off"
-            class="flex-1 border border-walnut-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-walnut-300">
-          <button type="submit" class="bg-walnut-500 hover:bg-walnut-600 text-white w-10 h-10 rounded-full flex items-center justify-center">
-            <i class="fas fa-arrow-up"></i>
-          </button>
-        </form>
-        <p class="text-[10px] text-walnut-400 text-center pb-2">By chatting, you agree to our <a href="/privacy-policy" class="underline">Privacy Policy</a>.</p>
       </div>
     `
 
     document.getElementById('chat-fab').addEventListener('click', openChat)
     document.getElementById('chat-close-btn').addEventListener('click', closeChat)
     document.getElementById('chat-input-form').addEventListener('submit', onFreeTextSubmit)
+    // Click on the dark backdrop (outside the panel) also closes the chat
+    document.getElementById('chat-overlay').addEventListener('click', (e) => {
+      if (e.target.id === 'chat-overlay') closeChat()
+    })
   }
 
   function openChat() {
-    const panel = document.getElementById('michael-chat-panel')
-    panel.classList.remove('hidden-state')
+    const overlay = document.getElementById('chat-overlay')
+    overlay.classList.remove('hidden-state')
     document.getElementById('chat-fab').classList.add('hidden')
+    document.body.classList.add('chat-open-lock')
     if (wizard.transcript.length === 0) {
       startWizard()
     }
   }
 
   function closeChat() {
-    document.getElementById('michael-chat-panel').classList.add('hidden-state')
+    document.getElementById('chat-overlay').classList.add('hidden-state')
     document.getElementById('chat-fab').classList.remove('hidden')
+    document.body.classList.remove('chat-open-lock')
   }
 
   function addAssistantMessage(content) {
