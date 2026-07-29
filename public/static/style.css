@@ -4,25 +4,14 @@ html { scroll-behavior: smooth; }
 
 .prose h2 { margin-top: 1.5rem; }
 
-/* Chat widget animations — centered modal overlay */
-#chat-overlay {
-  transition: opacity 0.2s ease;
-}
-#chat-overlay #michael-chat-panel {
+/* Chat widget animations */
+#michael-chat-panel {
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
-#chat-overlay.hidden-state {
+#michael-chat-panel.hidden-state {
   opacity: 0;
+  transform: translateY(16px) scale(0.98);
   pointer-events: none;
-}
-#chat-overlay.hidden-state #michael-chat-panel {
-  opacity: 0;
-  transform: translateY(16px) scale(0.97);
-}
-
-/* Prevent background page from scrolling while the chat modal is open */
-body.chat-open-lock {
-  overflow: hidden;
 }
 
 .chat-bubble-assistant {
