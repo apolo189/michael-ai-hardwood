@@ -315,7 +315,9 @@
         <input id="sqft-input" type="number" min="1" step="1" placeholder="Enter square footage" required
           class="w-full border border-walnut-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-walnut-300">
         <button type="submit" class="w-full bg-walnut-500 hover:bg-walnut-600 text-white font-semibold py-2.5 rounded-lg text-sm">Continue</button>
-        <button type="button" id="sqft-unsure-btn" class="w-full text-walnut-400 text-xs underline py-1">I don't know my square footage</button>
+        <button type="button" id="sqft-unsure-btn" class="w-full border-2 border-dashed border-walnut-300 hover:border-walnut-500 hover:bg-walnut-50 text-walnut-600 font-semibold text-sm py-2.5 rounded-lg flex items-center justify-center gap-2 transition">
+          <i class="fas fa-ruler-combined"></i> I don't know my square footage — measure my rooms
+        </button>
       </form>
     `)
     const form = document.getElementById('sqft-form')
