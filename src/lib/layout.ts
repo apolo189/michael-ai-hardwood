@@ -1,6 +1,13 @@
 // Shared HTML shell used by all pages (compliance-friendly: consistent header/footer with
 // business identity, Privacy Policy & Terms links on every page, per Google Ads policy).
 
+// Cache-busting version for /static/* assets (style.css, chat-widget.js, app.js). The
+// custom domain caches these files aggressively (CDN + browser, up to 4h). Bump this
+// string on every deploy that changes any of those files so the URL itself changes and
+// every client (CDN edge + phone browser) is forced to fetch the new version instead of
+// serving a stale cached copy. Format is free-form; a date+counter is easiest to bump.
+const ASSET_VERSION = '20260801-1'
+
 export function pageShell(opts: { title: string; description: string; bodyContent: string; activeNav?: string; web3formsKey?: string }) {
   const { title, description, bodyContent, web3formsKey } = opts
   return `<!DOCTYPE html>
@@ -14,7 +21,7 @@ export function pageShell(opts: { title: string; description: string; bodyConten
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="/static/style.css" rel="stylesheet">
+  <link href="/static/style.css?v=${ASSET_VERSION}" rel="stylesheet">
   <!-- Google Ads Conversion Tracking (base tag) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18326378981"></script>
   <script>
@@ -120,8 +127,8 @@ export function pageShell(opts: { title: string; description: string; bodyConten
     window.WEB3FORMS_ACCESS_KEY = ${JSON.stringify(web3formsKey || '')};
   </script>
   <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-  <script src="/static/chat-widget.js"></script>
-  <script src="/static/app.js"></script>
+  <script src="/static/chat-widget.js?v=${ASSET_VERSION}"></script>
+  <script src="/static/app.js?v=${ASSET_VERSION}"></script>
 </body>
 </html>`
 }
