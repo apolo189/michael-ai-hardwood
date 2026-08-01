@@ -420,14 +420,29 @@
     } else {
       sizeNote = "Got it. That's a substantial project — good thing we plan for it carefully."
     }
-    ackThenAsk(
-      sizeNote + ' One last question —',
-      'how soon would you like to start?',
-      renderTimelineStep
-    )
+    respondAfterThinking(() => {
+      addAssistantMessage(sizeNote)
+      setTimeout(() => {
+        if (!wizard.isRepair) {
+          const fitPhrase = {
+            sanding_refinishing_natural: 'refinishing',
+            sanding_refinishing_stain: 'a custom stain refinish',
+            hardwood_install: 'a new hardwood installation',
+            prefinished_install: 'a new hardwood installation',
+            laminate_install: 'a new laminate installation',
+            redoak_install_and_refinish: 'a full new hardwood installation with sanding & refinishing'
+          }[wizard.service] || 'this project'
+          addAssistantMessage(`Based on what you've shared, your floors appear to be a great candidate for ${fitPhrase}.`)
+        }
+        setTimeout(() => {
+          addAssistantMessage(wizard.isRepair ? "Here's what I'd recommend:" : "Here's your estimated investment:")
+          proceedToEstimate()
+        }, wizard.isRepair ? 0 : 500)
+      }, 500)
+    })
   }
 
-  // --- Q3: Timeline ---
+  // --- Q3: Timeline (asked AFTER the price, so the client sees their number first) ---
 
   function renderTimelineStep() {
     setActions(`
@@ -487,28 +502,15 @@
     addUserMessage(value)
     clearActions()
     respondAfterThinking(() => {
-      addAssistantMessage('Great.')
+      addAssistantMessage('Great — thank you.')
       setTimeout(() => {
-        if (!wizard.isRepair) {
-          const fitPhrase = {
-            sanding_refinishing_natural: 'refinishing',
-            sanding_refinishing_stain: 'a custom stain refinish',
-            hardwood_install: 'a new hardwood installation',
-            prefinished_install: 'a new hardwood installation',
-            laminate_install: 'a new laminate installation',
-            redoak_install_and_refinish: 'a full new hardwood installation with sanding & refinishing'
-          }[wizard.service] || 'this project'
-          addAssistantMessage(`Based on what you've shared, your floors appear to be a great candidate for ${fitPhrase}.`)
-        }
-        setTimeout(() => {
-          addAssistantMessage(wizard.isRepair ? "Here's what I'd recommend:" : "Here's your estimated investment:")
-          proceedToEstimate()
-        }, wizard.isRepair ? 0 : 500)
+        addAssistantMessage('What would you like to do next?')
+        renderPostEstimateStep()
       }, 500)
     })
   }
 
-  // --- Estimate (or, for repairs, the no-online-price message) ---
+  // --- Estimate (or, for repairs, the no-online-price message) — shown immediately after square footage ---
 
   async function proceedToEstimate() {
     if (wizard.isRepair) {
@@ -526,8 +528,11 @@
         scrollToBottom()
 
         setTimeout(() => {
-          addAssistantMessage('What would you like to do next?')
-          renderPostEstimateStep()
+          addAssistantMessage('Now just a couple of quick questions so we can plan the right visit for you.')
+          setTimeout(() => {
+            addAssistantMessage('How soon would you like to start?')
+            renderTimelineStep()
+          }, 500)
         }, 500)
       }, 300)
       return
@@ -572,8 +577,11 @@
       setTimeout(() => {
         addAssistantMessage("This estimate is based on the information you provided. If the measurements and floor condition match during our visit, this is the price we'll honor.")
         setTimeout(() => {
-          addAssistantMessage('What would you like to do next?')
-          renderPostEstimateStep()
+          addAssistantMessage('Now just a couple of quick questions so we can plan the right team for your project.')
+          setTimeout(() => {
+            addAssistantMessage('How soon would you like to start?')
+            renderTimelineStep()
+          }, 500)
         }, 500)
       }, 500)
     }, 300)
